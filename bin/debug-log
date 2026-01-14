@@ -1,0 +1,3 @@
+#!/bin/bash
+
+wp-env run wordpress -- bash -lc "touch wp-content/debug.log && tail -n 50 -f wp-content/debug.log"

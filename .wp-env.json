@@ -1,0 +1,15 @@
+{
+  "plugins": ["https://downloads.wordpress.org/plugin/elementor.3.34.1.zip"],
+  "mappings": {
+    "wp-content/plugins/fontawesome-elementor-addon": "./plugin",
+    "wp-content/plugins/wordpress-fontawesome-lib": "../wordpress-fontawesome-lib"
+  },
+  "env": {
+    "development": {
+      "config": {
+        "WP_DEBUG_LOG": true
+      }
+    }
+  },
+  "themes": []
+}

@@ -1,0 +1,6 @@
+#!/bin/bash
+
+# Convenience script to update the wp-env after changing config.
+# This is the quickest way to restart the containers with updated config
+# without do a full teardown and restart.
+wp-env start --update
