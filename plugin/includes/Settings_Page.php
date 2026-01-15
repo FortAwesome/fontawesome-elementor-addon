@@ -6,6 +6,8 @@ if ( ! defined( 'ABSPATH' ) ) {
 	exit; // Exit if accessed directly.
 }
 
+use FontAwesomeLib\Crypto;
+
 class Settings_Page {
   const PAGE_SLUG = 'fontawesome-elementor-addon-settings';
   const SETTINGS_GROUP = 'fontawesome_elementor_addon_settings_group';
@@ -71,6 +73,14 @@ class Settings_Page {
     );
 
     add_settings_field(
+      'api_token',
+      'API Token',
+      fn () => $this->render_api_token_field(),
+      self::PAGE_SLUG,
+      $general_section_name
+    );
+
+    add_settings_field(
       'kit_token',
       'Kit Token',
       fn () => $this->render_kit_token_field(),
@@ -94,12 +104,24 @@ class Settings_Page {
 
 		$output = $existing;
 
-    // Token: plain text (trim + sanitize)
     if (array_key_exists('kit_token', $input)) {
       $output['kit_token'] = sanitize_text_field(wp_unslash($input['kit_token']));
     }
 
-    // Load: checkbox (store as 1/0)
+    if (array_key_exists('api_token', $input)) {
+     	if ( defined( 'LOGGED_IN_SALT' ) &&
+			is_string( LOGGED_IN_SALT ) &&
+			defined( 'LOGGED_IN_KEY' ) &&
+			is_string( LOGGED_IN_KEY ) ) {
+	      	$crypto = new Crypto(["key" => LOGGED_IN_KEY, "salt" => LOGGED_IN_SALT]);
+			$sanitized = sanitize_text_field(wp_unslash($input['api_token']));
+			$encrypted = $crypto->encrypt( $sanitized );
+			if(! is_wp_error( $encrypted) ) {
+    			$output['api_token'] = $encrypted;
+			}
+       }
+    }
+
     if (array_key_exists('load', $input)) {
     	$output['load'] = ! empty($input['load']) ? 1 : 0;
     }
@@ -110,6 +132,7 @@ class Settings_Page {
   private function get_options() {
     $defaults = [
       'kit_token' => '',
+      'api_token' => '',
       'load'  => 0,
     ];
     $saved = get_option(Options::options_key(), []);
@@ -132,12 +155,25 @@ class Settings_Page {
   private function render_kit_token_field() {
     $opts = $this->get_options();
     $name = Options::options_key() . '[kit_token]';
+    $kit_token = $opts['kit_token'] ?? '';
     printf(
       '<input type="text" class="regular-text" name="%s" value="%s" autocomplete="off" />',
       esc_attr($name),
-      esc_attr($opts['kit_token'])
+      esc_attr($kit_token)
     );
     echo '<p class="description">Paste your Kit token here.</p>';
+  }
+
+  private function render_api_token_field() {
+    $opts = $this->get_options();
+    $name = Options::options_key() . '[api_token]';
+    $api_token = $opts['api_token'] ?? '';
+    printf(
+      '<input type="password" class="regular-text" name="%s" value="%s" autocomplete="off" />',
+      esc_attr($name),
+      esc_attr($api_token)
+    );
+    echo '<p class="description">Paste your Font Awesome API token here.</p>';
   }
 
   private function render_load_field() {
