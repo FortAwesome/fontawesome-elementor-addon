@@ -18,7 +18,7 @@ class Compatibility {
 	 */
 	const MINIMUM_PHP_VERSION = '7.4';
 
-	public static function is_compatible_for_activation(): bool {
+	public static function is_compatible_for_setup(): bool {
 		if ( version_compare( PHP_VERSION, self::MINIMUM_PHP_VERSION, '<' ) ) {
 			add_action( 'admin_notices', [ 'FontAwesomeElementorAddon\Compatibility', 'admin_notice_minimum_php_version' ] );
 			return false;

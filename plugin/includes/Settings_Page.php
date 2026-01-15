@@ -56,6 +56,7 @@ class Settings_Page {
 
   private function register_settings() {
     $general_section_name = 'fontawesome_elementor_addon_general_section';
+    $kit_setup_section_name = 'fontawesome_elementor_addon_kit_setup_section';
 
     register_setting(
       self::SETTINGS_GROUP,
@@ -94,6 +95,25 @@ class Settings_Page {
       fn () => $this->render_load_field(),
       self::PAGE_SLUG,
       $general_section_name
+    );
+
+    add_settings_section(
+      $kit_setup_section_name,
+      'Kit Setup',
+      function () {
+      ?>
+        <div class="fontawesome-elementor-addon-kit-setup">
+          <button type="button" class="button button-secondary" id="fontawesome-elementor-addon-kit-setup-start">
+            Setup Kit
+          </button>
+
+          <span class="spinner" id="fontawesome-elementor-addon-kit-setup-spinner" style="float:none;"></span>
+
+          <span id="fontawesome-elementor-addon-kit-setup-status" style="margin-left:8px;"></span>
+        </div>
+      <?php
+      },
+      self::PAGE_SLUG
     );
   }
 
@@ -165,9 +185,9 @@ class Settings_Page {
   }
 
   private function render_api_token_field() {
-    $opts = $this->get_options();
+  	$decrypted_api_token = Options::get_decrypted_api_token();
     $name = Options::options_key() . '[api_token]';
-    $api_token = $opts['api_token'] ?? '';
+    $api_token = is_wp_error( $decrypted_api_token ) ? '' : $decrypted_api_token;
     printf(
       '<input type="password" class="regular-text" name="%s" value="%s" autocomplete="off" />',
       esc_attr($name),

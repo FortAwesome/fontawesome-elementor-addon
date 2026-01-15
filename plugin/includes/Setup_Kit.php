@@ -9,115 +9,151 @@ if ( ! defined( 'ABSPATH' ) ) {
 use FontAwesomeLib\Base\Query_Resolver_Base;
 use FontAwesomeLib\Base\Auth_Token_Provider_Base;
 use FontAwesomeLib\Kit_Download;
+use FontAwesomeLib\Crypto;
 use FontAwesomeElementorAddon\Options;
 
 class Setup_Kit {
-	public static function setup($api_token, $kit_token): bool|WP_Error {
-		$upload_dir = \wp_upload_dir( null, false, false );
-
-		if ( isset( $upload_dir['error'] ) && false !== $upload_dir['error'] ) {
-				wp_die(
-            __('There was an error initializing the uploads directory for setting up the Font Awesome Kit', 'fontawesome-elementor-addon'),
-            'Font Awesome Elementor Addon',
-            ["back_link" => true]
-        );
+	public static function start(): void {
+		if ( !current_user_can( 'manage_options' ) ) {
+			wp_send_json_error(['message' => 'Forbidden'], 403);
+			return;
 		}
 
-		if ( !is_string($api_token) || '' === $api_token ) {
-			wp_die(
-            __('No Font Awesome API token was found. Cannot initialize a Font Awesome Kit', 'fontawesome-elementor-addon'),
-            'Font Awesome Elementor Addon',
-            ["back_link" => true]
-        );
+		check_ajax_referer('fontawesome_elementor_addon_kit_setup_nonce', 'nonce');
+
+		if ( !Compatibility::is_compatible_for_setup() ) {
+			wp_send_json_error([
+				'message' =>
+				__("Font Awesome Elementor Addon is not compatible on this site.", "fontawesome-elementor-addon")
+			], 500);
+
+			return;
 		}
 
-		if ( !is_string( $kit_token ) || '' === $kit_token ) {
-			wp_die(
-            __('No Font Awesome Kit token was found. Cannot initialize a Font Awesome Kit', 'fontawesome-elementor-addon'),
-            'Font Awesome Elementor Addon',
-            ["back_link" => true]
-        );
-		}
+    	$api_token = Options::get_decrypted_api_token();
+
+        if( is_wp_error( $api_token ) ) {
+        	wp_send_json_error([
+				'message' =>
+				$api_token->get_error_message()
+			], 500);
+        }
+
+        $option = get_option(Options::options_key(), []);
+
+        if ( !is_array( $option ) || !isset( $option['kit_token'] ) || !is_string( $option['kit_token'] ) ) {
+         	wp_send_json_error(['message' => __('Invalid Font Awesome kit token. Try re-setting it.', 'fontawesome-elementor-addon')], 500);
+         	return;
+        }
+
+        $kit_token = $option['kit_token'];
 
 		$token_provider = new Auth_Token_Provider_Base($api_token);
 		$access_token = $token_provider->get_access_token();
 
 		if ( is_wp_error( $access_token ) ) {
-			return $access_token;
+			wp_send_json_error([
+				'message' =>
+				$access_token->get_error_message()
+			], 500);
+
+			return;
 		}
 
 		$query_resolver = new Query_Resolver_Base();
 
-		// Planned workflow:
-		// 1. create_kit_download to get buildId. This will be returned to the client.
-		// 2. poll with buildId until status is "READY".
-		// 3. invoke download_and_prepare_selfhosting to download and extract the zip.
+		$kit_download = Kit_Download::create_kit_download( $query_resolver, $token_provider, $kit_token );
 
-		// This is what it will look to initially create a kit download:
-		$kit_download_initial = Kit_Download::create_kit_download( $query_resolver, $token_provider, $kit_token );
+		if (is_wp_error( $kit_download )) {
+			wp_send_json_error([
+				'message' =>
+				$kit_download->get_error_message()
+			], 500);
 
-		if (is_wp_error( $kit_download_initial )) {
-			$kit_download_initial->add(
-            "fontawesome_elementor_addon_create_kit_download_error",
-            __(
-                "Font Awesome Elementor Addon was unable to create a Kit Download.",
-                "fontawesome-elementor-addon",
-            )
-			);
-
-			wp_die(
-            $kit_download_initial,
-            'Font Awesome Elementor Addon',
-            ["back_link" => true]
-        );
+			return;
 		}
 
-		// When the client polls, it will provide the build_id and kit_token from above, which
-		// will allow it to poll and/or download the zip:
+		wp_send_json_success( [ 'build_id' => $kit_download->get_build_id() ] );
+
+		return;
+	}
+
+	public static function status() {
+		if (!current_user_can('manage_options')) {
+			wp_send_json_error(['message' => 'Forbidden'], 403);
+		}
+
+		check_ajax_referer('fontawesome_elementor_addon_kit_setup_nonce', 'nonce');
+
+		$build_id = isset($_POST['build_id']) ? sanitize_text_field(wp_unslash($_POST['build_id'])) : '';
+
+		if ( !$build_id || '' === $build_id) {
+			wp_send_json_error( [ 'message' => __('Missing build_id', 'fontawesome-elementor-addon' ) ], 400 );
+			return;
+		}
+
+		$option = get_option(Options::options_key(), []);
+
+		if ( !is_array( $option ) || !isset( $option['kit_token'] ) || !is_string( $option['kit_token'] ) ) {
+         	wp_send_json_error(['message' => __('Invalid Font Awesome kit token. Try re-setting it.', 'fontawesome-elementor-addon')], 500);
+         	return;
+        }
+
+       	$api_token = Options::get_decrypted_api_token();
+
+        if( is_wp_error( $api_token ) ) {
+        	wp_send_json_error([
+         		'message' =>
+           		$api_token->get_error_message()
+             ], 500);
+        }
+
+        $upload_dir = \wp_upload_dir( null, false, false );
+
+		if ( isset( $upload_dir['error'] ) && false !== $upload_dir['error'] ) {
+			wp_send_json_error([
+				'message' =>
+				__("There was an error initializing the uploads directory for setting up the Font Awesome Kit", "fontawesome-elementor-addon")
+			], 500);
+			return;
+		}
+
 		$kit_download = new Kit_Download(
-			$kit_download_initial->get_kit_token(),
-			$kit_download_initial->get_build_id()
+			$option['kit_token'],
+			$build_id
 		);
+
+		$token_provider = new Auth_Token_Provider_Base($api_token);
+
+		$query_resolver = new Query_Resolver_Base();
 
 		$poll_result = $kit_download->poll( $query_resolver, $token_provider );
 
-		if (is_wp_error( $poll_result )) {
-			$poll_result->add(
-				"fontawesome_elementor_addon_poll_kit_download_error",
-				__(
-					"Font Awesome Elementor Addon was unable to poll the Kit Download status.",
-					"fontawesome-elementor-addon",
-				)
+		if ( is_wp_error( $poll_result ) ) {
+			$this_message = __(
+				"Font Awesome Elementor Addon was unable to poll the Kit Download status.",
+				"fontawesome-elementor-addon",
 			);
 
-			wp_die(
-            $poll_result,
-            'Font Awesome Elementor Addon',
-            ["back_link" => true]
-        );
+			$that_message = $poll_result->get_error_message();
+
+			$message = $that_message . " " . $this_message;
+
+			wp_send_json_error( [ 'message' => $message ], 500 );
+
+			return;
 		}
 
 		if (!$kit_download->is_ready()) {
-			$wp_error = new WP_Error(
-				"fontawesome_elementor_addon_kit_not_ready_error",
-				__(
-					"Font Awesome Elementor Addon Kit Download is not ready yet.",
-					"fontawesome-elementor-addon",
-				)
-			);
-
-			wp_die(
-            $wp_error,
-            'Font Awesome Elementor Addon',
-            ["back_link" => true]
-        );
+			wp_send_json_success( [ 'ready' => false ] );
+			return;
 		}
 
 		$upload_base_dir = $upload_dir["basedir"];
 
-		$kit_assets_absolute_dir = $kit_download->download_and_prepare_selfhosting($query_resolver, $token_provider, $upload_base_dir);
+		$kit_assets_absolute_dir = $kit_download->download_and_prepare_selfhosting( $query_resolver, $token_provider, $upload_base_dir );
 
-		if (is_wp_error( $kit_assets_absolute_dir )) {
+		if ( is_wp_error( $kit_assets_absolute_dir ) ) {
 			$kit_assets_absolute_dir->add(
 				"fontawesome_elementor_addon_download_kit_error",
 				__(
@@ -126,34 +162,41 @@ class Setup_Kit {
 				)
 			);
 
-			wp_die(
-				$kit_assets_absolute_dir,
-				'Font Awesome Elementor Addon',
-				["back_link" => true]
-			);
+			$message = implode( ' ', $kit_assets_absolute_dir->get_error_messages() );
+
+			wp_send_json_error( [ 'message' => $message ], 500 );
+
+			return;
 		}
 
 		$kit_assets_relative_dir = str_replace( trailingslashit( $upload_base_dir ), '', trailingslashit( $kit_assets_absolute_dir ) );
 
-		$options = [
-			"option_schema_version" => 1,
-			"kit_assets_relative_dir" => $kit_assets_relative_dir
-		];
+		$option = get_option( Options::options_key(), [ "option_schema_version" => 1 ] );
 
-		$update_result = update_option( Options::options_key(), $options );
+		// We don't want to re-encrypt it.
+		unset( $option['api_token'] );
+
+		$option["kit_assets_relative_dir"] = $kit_assets_relative_dir;
+
+		$update_result = update_option( Options::options_key(), $option );
 
 		if ( false === $update_result ) {
-			$existing_option = get_option( Options::options_key() );
+			$previous_option = get_option( Options::options_key() );
 
-			if ($existing_option != $options) {
-				wp_die(
-					__('Font Awesome Elementor Addon was unable to save its configuration options.', 'fontawesome-elementor-addon'),
-					'Font Awesome Elementor Addon',
-					["back_link" => true]
-				);
+			// Don't include the api_token in the comparison.
+			unset( $previous_option['api_token'] );
+
+			if ( $previous_option != $option ) {
+				wp_send_json_error( [ 'message' =>
+					__('Your kit was successfully downloaded and set up on your WordPress server, but there was a problem updating the plugin options with the results. Try again?', 'fontawesome-elementor-addon'),
+				], 500 );
+
+				return;
 			}
 		}
 
-		return true;
+		wp_send_json_success( [ 'done' => true ] );
+
+		return;
 	}
 }

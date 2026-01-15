@@ -18,10 +18,9 @@ final class Plugin {
 	 * Plugin version.
 	 *
 	 * @since 0.1.0
-	 * @access private
 	 * @var string the plugin version.
 	 */
-	private $_plugin_version = '0.1.0';
+	const PLUGIN_VERSION = '0.1.0';
 
 	/**
 	 * Instance
@@ -100,7 +99,7 @@ final class Plugin {
 			'fontawesome-elementor-addon-editor',
 			plugins_url('assets/js/editor.js', dirname(__FILE__) ),
 			['jquery'],
-			$this->_plugin_version,
+			self::PLUGIN_VERSION,
 	  		true
 		);
 

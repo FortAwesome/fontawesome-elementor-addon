@@ -21,17 +21,27 @@ add_action("elementor/init", function () {
     \FontAwesomeElementorAddon\Plugin::instance()->init();
 });
 
-add_action(
-    "activate_fontawesome-elementor-addon/fontawesome-elementor-addon.php",
-    function () {
-        require_once __DIR__ . "/autoload.php";
-        $api_token = getenv("API_TOKEN");
-        $kit_token = getenv("KIT_TOKEN");
-        if (
-            \FontAwesomeElementorAddon\Compatibility::is_compatible_for_activation()
-        ) {
-            \FontAwesomeElementorAddon\Setup_Kit::setup($api_token, $kit_token);
-        }
-    },
-    -1,
-);
+add_action('admin_enqueue_scripts', function($hook) {
+	require_once __DIR__ . "/autoload.php";
+	if ($hook !== 'settings_page_' . \FontAwesomeElementorAddon\Settings_Page::PAGE_SLUG) return;
+
+	wp_enqueue_script(
+		'fontawesome-elementor-addon-admin',
+		plugins_url('assets/js/admin.js', __FILE__),
+		['jquery'],
+		\FontAwesomeElementorAddon\Plugin::PLUGIN_VERSION,
+		true
+	);
+
+	wp_localize_script(
+		'fontawesome-elementor-addon-admin',
+		'FontawesomeElementorAddonAdmin',
+		[
+			'ajaxurl' => admin_url('admin-ajax.php'),
+			'nonce' => wp_create_nonce('fontawesome_elementor_addon_kit_setup_nonce'),
+		]
+	);
+});
+
+add_action('wp_ajax_fontawesome_elementor_addon_kit_setup_start', ['\FontAwesomeElementorAddon\Setup_Kit', 'start']);
+add_action('wp_ajax_fontawesome_elementor_addon_kit_setup_status', ['\FontAwesomeElementorAddon\Setup_Kit', 'status']);
