@@ -12,7 +12,7 @@ use FontAwesomeLib\Kit_Download;
 use FontAwesomeElementorAddon\Options;
 
 class Setup_Kit {
-	public static function setup($api_token, $kit_token) {
+	public static function setup($api_token, $kit_token): bool|WP_Error {
 		$upload_dir = \wp_upload_dir( null, false, false );
 
 		if ( isset( $upload_dir['error'] ) && false !== $upload_dir['error'] ) {
@@ -41,6 +41,11 @@ class Setup_Kit {
 
 		$token_provider = new Auth_Token_Provider_Base($api_token);
 		$access_token = $token_provider->get_access_token();
+
+		if ( is_wp_error( $access_token ) ) {
+			return $access_token;
+		}
+
 		$query_resolver = new Query_Resolver_Base();
 
 		// Planned workflow:
@@ -148,5 +153,7 @@ class Setup_Kit {
 				);
 			}
 		}
+
+		return true;
 	}
 }
