@@ -10,7 +10,15 @@
   }
 
   function poll(buildId) {
-    pollTimer = setInterval(function () {
+    const delayMs = 1000;
+
+    // Clear any existing timer before starting a new polling loop
+    if (pollTimer) {
+      clearTimeout(pollTimer);
+      pollTimer = null;
+    }
+
+    function doPoll() {
       $.post(FontawesomeElementorAddonAdmin.ajaxurl, {
         action: "fontawesome_elementor_addon_kit_setup_status",
         nonce: FontawesomeElementorAddonAdmin.nonce,
@@ -22,7 +30,7 @@
               "Error checking status.",
             );
             setBusy(false);
-            clearInterval(pollTimer);
+            pollTimer = null;
             return;
           }
 
@@ -33,23 +41,33 @@
 
           if (data.done) {
             setBusy(false);
-            clearInterval(pollTimer);
             $("#fontawesome-elementor-addon-kit-setup-status").text("Done.");
+            pollTimer = null;
+            return;
           }
+
+          // Not done yet: wait, then poll again
+          pollTimer = setTimeout(doPoll, delayMs);
         })
         .fail(function () {
           $("#fontawesome-elementor-addon-kit-setup-status").text(
             "Request failed.",
           );
           setBusy(false);
-          clearInterval(pollTimer);
+          pollTimer = null;
         });
-    }, 1000);
+    }
+
+    // Kick off the first poll immediately
+    doPoll();
   }
 
   $(function () {
     $("#fontawesome-elementor-addon-kit-setup-start").on("click", function () {
-      if (pollTimer) clearInterval(pollTimer);
+      if (pollTimer) {
+        clearTimeout(pollTimer);
+        pollTimer = null;
+      }
 
       setBusy(true);
       $("#fontawesome-elementor-addon-kit-setup-status").text("Starting…");
