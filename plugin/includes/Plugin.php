@@ -495,7 +495,7 @@ final class Plugin {
 	}
 
 	private function enqueue_font_awesome_style_css(): void {
-     	wp_enqueue_style( $this->get_style_css_resource_handle(), $this->get_style_css_url(), [], $this->_plugin_version );
+     	wp_enqueue_style( $this->get_style_css_resource_handle(), $this->get_style_css_url(), [], self::PLUGIN_VERSION );
       	$this->add_inline_style( $this->get_style_css_resource_handle() );
 	}
 
