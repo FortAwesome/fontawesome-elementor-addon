@@ -11,6 +11,7 @@ use FontAwesomeLib\Crypto;
 class Settings_Page {
   const PAGE_SLUG = 'fontawesome-elementor-addon-settings';
   const SETTINGS_GROUP = 'fontawesome_elementor_addon_settings_group';
+  const BACKEND_ONLY_SETTINGS_TEXT = [ 'kit_assets_relative_dir', 'option_schema_version' ];
 
   /**
 	 * Instance
@@ -123,6 +124,12 @@ class Settings_Page {
 	  if (!is_array($existing)) $existing = [];
 
 		$output = $existing;
+
+	  foreach( self::BACKEND_ONLY_SETTINGS_TEXT as $key ) {
+		if ( array_key_exists( $key, $input ) ) {
+	      $output[ $key ] = sanitize_text_field(wp_unslash($input[$key]));
+	    }
+	  }
 
     if (array_key_exists('kit_token', $input)) {
       $output['kit_token'] = sanitize_text_field(wp_unslash($input['kit_token']));
