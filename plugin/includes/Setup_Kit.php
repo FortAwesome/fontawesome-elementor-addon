@@ -39,7 +39,7 @@ class Setup_Kit {
 			], 500);
         }
 
-        $option = get_option(Options::options_key(), []);
+        $option = get_option(Options::option_name(), []);
 
         if ( !is_array( $option ) || !isset( $option['kit_token'] ) || !is_string( $option['kit_token'] ) ) {
          	wp_send_json_error(['message' => __('Invalid Font Awesome kit token. Try re-setting it.', 'fontawesome-elementor-addon')], 500);
@@ -92,7 +92,7 @@ class Setup_Kit {
 			return;
 		}
 
-		$option = get_option(Options::options_key(), []);
+		$option = get_option(Options::option_name(), []);
 
 		if ( !is_array( $option ) || !isset( $option['kit_token'] ) || !is_string( $option['kit_token'] ) ) {
          	wp_send_json_error(['message' => __('Invalid Font Awesome kit token. Try re-setting it.', 'fontawesome-elementor-addon')], 500);
@@ -171,17 +171,17 @@ class Setup_Kit {
 
 		$kit_assets_relative_dir = str_replace( trailingslashit( $upload_base_dir ), '', trailingslashit( $kit_assets_absolute_dir ) );
 
-		$option = get_option( Options::options_key(), [ "option_schema_version" => 1 ] );
+		$option = Options::get_options_with_defaults();
 
 		// We don't want to re-encrypt it.
 		unset( $option['api_token'] );
 
 		$option["kit_assets_relative_dir"] = $kit_assets_relative_dir;
 
-		$update_result = update_option( Options::options_key(), $option );
+		$update_result = update_option( Options::option_name(), $option );
 
 		if ( false === $update_result ) {
-			$previous_option = get_option( Options::options_key() );
+			$previous_option = get_option( Options::option_name() );
 
 			// Don't include the api_token in the comparison.
 			unset( $previous_option['api_token'] );

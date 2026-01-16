@@ -7,7 +7,7 @@ if ( ! defined( 'WP_UNINSTALL_PLUGIN' ) ) {
 
 require_once trailingslashit(__DIR__) . 'includes/Options.php';
 
-delete_option( FontAwesomeElementorAddon\Options::options_key() );
+delete_option( FontAwesomeElementorAddon\Options::option_name() );
 
 // for site options in Multisite
-delete_site_option( FontAwesomeElementorAddon\Options::options_key() );
+delete_site_option( FontAwesomeElementorAddon\Options::option_name() );

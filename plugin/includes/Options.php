@@ -10,15 +10,17 @@ use \WP_Error;
 use FontAwesomeLib\Crypto;
 
 class Options {
-	private const OPTIONS_KEY = 'fontawesome_elementor_addon';
+	private const OPTION_NAME = 'fontawesome_elementor_addon';
+	private const OPTION_SCHEMA_VERSION = 1;
+	private const BACKEND_ONLY_SETTINGS_TEXT = [ 'kit_assets_relative_dir', 'option_schema_version' ];
 
 	/**
-	 * Return the name of this plugin's options in the database.
+	 * Return the option_name of this plugin's option record in the `wp_options` table in the database.
 	 *
 	 * @return string the option name
 	 */
-	public static function options_key(): string {
-		return self::OPTIONS_KEY;
+	public static function option_name(): string {
+		return self::OPTION_NAME;
 	}
 
 	/**
@@ -26,7 +28,7 @@ class Options {
 	 * @return string|WP_Error the decrypted API token on success or WP_Error on error.
 	 */
 	public static function get_decrypted_api_token(): string|WP_Error {
- 		$option = get_option(Options::options_key(), []);
+ 		$option = get_option(Options::option_name(), []);
 
     	$api_token = null;
 
@@ -62,5 +64,66 @@ class Options {
          }
 
          return $api_token;
+	}
+
+	/**
+	 * Get options from database, with defaults. This can also be used to initialize options
+	 *  with defaults before writing the first time.
+	 * @return array
+	 */
+	public static function get_options_with_defaults(): array {
+	    $defaults = [
+	      'kit_token' => '',
+	      'api_token' => '',
+	      'load'  => 0,
+			'option_schema_version' => self::OPTION_SCHEMA_VERSION
+	    ];
+
+	    $saved = get_option(self::option_name(), []);
+
+	    return wp_parse_args(is_array($saved) ? $saved : [], $defaults);
+	}
+
+	/**
+	 * Sanitize the input options array.
+	 * @param array
+	 * @return array sanitized options that could be written to the database.
+	 */
+	public static function sanitize($input): array {
+		// Existing saved settings (may include keys not on the form)
+		  $existing = get_option(Options::option_name(), []);
+		  if (!is_array($existing)) $existing = [];
+
+			$output = $existing;
+
+		  foreach( self::BACKEND_ONLY_SETTINGS_TEXT as $key ) {
+			if ( array_key_exists( $key, $input ) ) {
+		      $output[ $key ] = sanitize_text_field(wp_unslash($input[$key]));
+		    }
+		  }
+
+		    if (array_key_exists('kit_token', $input)) {
+		      $output['kit_token'] = sanitize_text_field(wp_unslash($input['kit_token']));
+		    }
+
+		    if (array_key_exists('api_token', $input)) {
+		     	if ( defined( 'LOGGED_IN_SALT' ) &&
+				is_string( LOGGED_IN_SALT ) &&
+				defined( 'LOGGED_IN_KEY' ) &&
+				is_string( LOGGED_IN_KEY ) ) {
+			      	$crypto = new Crypto(["key" => LOGGED_IN_KEY, "salt" => LOGGED_IN_SALT]);
+					$sanitized = sanitize_text_field(wp_unslash($input['api_token']));
+					$encrypted = $crypto->encrypt( $sanitized );
+					if(! is_wp_error( $encrypted) ) {
+			    			$output['api_token'] = $encrypted;
+					}
+				}
+			}
+
+		    if (array_key_exists('load', $input)) {
+		    	$output['load'] = ! empty($input['load']) ? 1 : 0;
+		    }
+
+			return $output;
 	}
 }

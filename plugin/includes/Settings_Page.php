@@ -6,12 +6,9 @@ if ( ! defined( 'ABSPATH' ) ) {
 	exit; // Exit if accessed directly.
 }
 
-use FontAwesomeLib\Crypto;
-
 class Settings_Page {
   const PAGE_SLUG = 'fontawesome-elementor-addon-settings';
   const SETTINGS_GROUP = 'fontawesome_elementor_addon_settings_group';
-  const BACKEND_ONLY_SETTINGS_TEXT = [ 'kit_assets_relative_dir', 'option_schema_version' ];
 
   /**
 	 * Instance
@@ -61,8 +58,8 @@ class Settings_Page {
 
     register_setting(
       self::SETTINGS_GROUP,
-      Options::options_key(),
-      fn ( $input ) => $this->sanitize( $input )
+      Options::option_name(),
+      ['\FontAwesomeElementorAddon\Options', 'sanitize']
     );
 
     add_settings_section(
@@ -118,54 +115,6 @@ class Settings_Page {
     );
   }
 
-  private function sanitize($input) {
-	  // Existing saved settings (may include keys not on the form)
-	  $existing = get_option(Options::options_key(), []);
-	  if (!is_array($existing)) $existing = [];
-
-		$output = $existing;
-
-	  foreach( self::BACKEND_ONLY_SETTINGS_TEXT as $key ) {
-		if ( array_key_exists( $key, $input ) ) {
-	      $output[ $key ] = sanitize_text_field(wp_unslash($input[$key]));
-	    }
-	  }
-
-    if (array_key_exists('kit_token', $input)) {
-      $output['kit_token'] = sanitize_text_field(wp_unslash($input['kit_token']));
-    }
-
-    if (array_key_exists('api_token', $input)) {
-     	if ( defined( 'LOGGED_IN_SALT' ) &&
-			is_string( LOGGED_IN_SALT ) &&
-			defined( 'LOGGED_IN_KEY' ) &&
-			is_string( LOGGED_IN_KEY ) ) {
-	      	$crypto = new Crypto(["key" => LOGGED_IN_KEY, "salt" => LOGGED_IN_SALT]);
-			$sanitized = sanitize_text_field(wp_unslash($input['api_token']));
-			$encrypted = $crypto->encrypt( $sanitized );
-			if(! is_wp_error( $encrypted) ) {
-    			$output['api_token'] = $encrypted;
-			}
-       }
-    }
-
-    if (array_key_exists('load', $input)) {
-    	$output['load'] = ! empty($input['load']) ? 1 : 0;
-    }
-
-    return $output;
-  }
-
-  private function get_options() {
-    $defaults = [
-      'kit_token' => '',
-      'api_token' => '',
-      'load'  => 0,
-    ];
-    $saved = get_option(Options::options_key(), []);
-    return wp_parse_args(is_array($saved) ? $saved : [], $defaults);
-  }
-
   private function render_page() {
     if ( ! current_user_can('manage_options') ) return;
 
@@ -180,8 +129,8 @@ class Settings_Page {
   }
 
   private function render_kit_token_field() {
-    $opts = $this->get_options();
-    $name = Options::options_key() . '[kit_token]';
+    $opts = Options::get_options_with_defaults();
+    $name = Options::option_name() . '[kit_token]';
     $kit_token = $opts['kit_token'] ?? '';
     printf(
       '<input type="text" class="regular-text" name="%s" value="%s" autocomplete="off" />',
@@ -193,7 +142,7 @@ class Settings_Page {
 
   private function render_api_token_field() {
   	$decrypted_api_token = Options::get_decrypted_api_token();
-    $name = Options::options_key() . '[api_token]';
+    $name = Options::option_name() . '[api_token]';
     $api_token = is_wp_error( $decrypted_api_token ) ? '' : $decrypted_api_token;
     printf(
       '<input type="password" class="regular-text" name="%s" value="%s" autocomplete="off" />',
@@ -204,8 +153,8 @@ class Settings_Page {
   }
 
   private function render_load_field() {
-    $opts = $this->get_options();
-    $name = Options::options_key() . '[load]';
+    $opts = Options::get_options_with_defaults();
+    $name = Options::option_name() . '[load]';
     printf(
       '<label><input type="checkbox" name="%s" value="1" %s /> Enable loading</label>',
       esc_attr($name),

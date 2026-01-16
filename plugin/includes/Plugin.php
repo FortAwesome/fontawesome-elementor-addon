@@ -199,7 +199,7 @@ final class Plugin {
 			return $option;
 		}
 
-		$result = get_option( Options::options_key() );
+		$result = get_option( Options::option_name() );
 
 		if (!is_array($result)) {
 			return null;
@@ -319,7 +319,7 @@ final class Plugin {
 			);
 		}
 
-		$option = get_option( Options::options_key() );
+		$option = get_option( Options::option_name() );
 
 		if(!is_array($option) || !isset($option["kit_assets_relative_dir"])) {
 			return new WP_Error(
