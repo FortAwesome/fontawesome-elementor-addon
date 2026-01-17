@@ -8,6 +8,12 @@
 
 	<arg name="extensions" value="php"/>
 
+	<file>uninstall.php</file>
+	<file>autoload.php</file>
+	<file>fontawesome-elementor-addon.php</file>
+	<file>includes</file>
+	<file>tests</file>
+
 	<config name="text_domain" value="fontawesome-elementor-addon" />
 
 	<exclude-pattern>vendor/</exclude-pattern>
