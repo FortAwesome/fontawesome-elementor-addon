@@ -37,6 +37,8 @@
 		<exclude name="Generic.Commenting.DocComment.MissingShort" />
 		<exclude name="Generic.Formatting.MultipleStatementAlignment.NotSameWarning" />
 		<exclude name="Generic.PHP.DeprecatedFunctions.Deprecated" />
+		<exclude name="WordPress.Files.FileName.NotHyphenatedLowercase" />
+		<exclude name="Squiz.Commenting.FileComment.MissingPackageTag" />
 		<exclude name="Squiz.Commenting.ClassComment.Missing" />
 		<exclude name="Squiz.Commenting.FileComment.Missing" />
 		<exclude name="Squiz.Commenting.FunctionComment.Missing" />
