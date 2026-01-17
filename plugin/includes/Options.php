@@ -91,7 +91,7 @@ class Options {
 	/**
 	 * Sanitize the input options array.
 	 *
-	 * @param array
+	 * @param array $input
 	 * @return array sanitized options that could be written to the database.
 	 */
 	public static function sanitize( $input ): array {

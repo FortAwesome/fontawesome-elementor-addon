@@ -420,22 +420,7 @@ final class Plugin {
 		return preg_replace( '/^' . preg_quote( $prefix, '/' ) . '/', '', $prefixed_icon_name );
 	}
 
-	// This render_callback seems to fire on the backend in the editor, loading a saved page with
-	// with an icon. When initially inserting a new icon, it uses an `<i>` tag and relies on Webfont/CSS.
-	// When the Elementor experiment for inline SVGs is enabled, and our icon tabs are added as "native" tabs,
-	// then it bypasses this render_callback
-	// and uses its internal Font Awesome data manager to look up the SVG objects and render them.
-	// Of course, it won't have access to FA Pro styles and icons.
-	// So, to make this work on both the backend and front end, either that experiment must be disabled,
-	// or our icon tabs must be added as "additional_tabs".
-	//
-	// Disabling the experiment can be done in Elementor -> Settings --> Experiments --> Inline Font Icons.
-	// Or by adding this filter--see below:
-	//
-	// add_action('elementor/experiments/default-features-registered', function($experiments_manager) {
-	// $experiments_manager->set_feature_default_state('e_font_icon_svg', 'inactive');
-	// });
-	private function render_font_awesome_svg_icon( $wp_filesystem, $svg_data_dir, $included_family_styles, $icon, $attributes = [], $tag = 'i' ) {
+	private function render_font_awesome_svg_icon( $wp_filesystem, $svg_data_dir, $included_family_styles, $icon ) {
 		$value_parts = explode( ' ', $icon['value'], 2 );
 
 		if ( count( $value_parts ) < 2 ) {
