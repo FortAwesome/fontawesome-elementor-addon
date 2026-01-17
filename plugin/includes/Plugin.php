@@ -619,4 +619,18 @@ EOT;
 	private function get_frontend_css_urls() {
 		return [ $this->get_style_css_url() ];
 	}
+
+	private function is_font_icon_inline_svg(): bool {
+		if ( ! did_action( 'elementor/loaded' ) ) {
+			return false;
+		}
+
+		$elementor_plugin = \Elementor\Plugin::$instance;
+
+		if ( ! isset( $elementor_plugin->experiments ) ) {
+			return false;
+		}
+
+		return $elementor_plugin->experiments->is_feature_active( 'e_font_icon_svg' );
+	}
 }
