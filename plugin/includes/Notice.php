@@ -9,11 +9,11 @@ if ( ! defined( 'ABSPATH' ) ) {
 /**
  * An admin Notice that appears on the WordPress admin dashboard with Elementor styling.
  */
-class Notice extends \Elementor\Core\Admin\Notices\Base_Notice  {
+class Notice extends \Elementor\Core\Admin\Notices\Base_Notice {
 	protected $title = null;
 	protected $description = null;
 
-	public function __construct($title, $description) {
+	public function __construct( $title, $description ) {
 		$this->title = $title;
 		$this->description = $description;
 	}

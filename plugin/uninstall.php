@@ -2,10 +2,10 @@
 
 // if uninstall.php is not called by WordPress, die
 if ( ! defined( 'WP_UNINSTALL_PLUGIN' ) ) {
-    die;
+	die;
 }
 
-require_once trailingslashit(__DIR__) . 'includes/Options.php';
+require_once trailingslashit( __DIR__ ) . 'includes/Options.php';
 
 delete_option( FontAwesomeElementorAddon\Options::option_name() );
 

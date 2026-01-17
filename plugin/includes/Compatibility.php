@@ -24,21 +24,21 @@ class Compatibility {
 			return false;
 		}
 
-		if (! self::check_compatibility_wp_filesystem() ) {
+		if ( ! self::check_compatibility_wp_filesystem() ) {
 			return false;
 		}
 
 		global $wp_filesystem;
 
-		if (! self::check_compatibility_wp_upload_dir($wp_filesystem)) {
+		if ( ! self::check_compatibility_wp_upload_dir( $wp_filesystem ) ) {
 			return false;
 		}
 
-		if (! self::check_compatibility_temp_dir($wp_filesystem)) {
+		if ( ! self::check_compatibility_temp_dir( $wp_filesystem ) ) {
 			return false;
 		}
 
-		if (! self::check_compatibility_api_service() ) {
+		if ( ! self::check_compatibility_api_service() ) {
 			return false;
 		}
 
@@ -51,7 +51,7 @@ class Compatibility {
 			return false;
 		}
 
-		if (! self::check_compatibility_wp_filesystem() ) {
+		if ( ! self::check_compatibility_wp_filesystem() ) {
 			return false;
 		}
 
@@ -60,8 +60,8 @@ class Compatibility {
 
 	private static function check_compatibility_api_service(): bool {
 		$query_resolver = new Query_Resolver_Base();
-		$auth_token_provider = new Auth_Token_Provider_Base('FAKE_API_TOKEN');
-		$query = <<<EOT
+		$auth_token_provider = new Auth_Token_Provider_Base( 'FAKE_API_TOKEN' );
+		$query = <<<'EOT'
         query {
           release(version: "7.x") {
             version
@@ -69,9 +69,9 @@ class Compatibility {
         }
         EOT;
 
-		$response = $query_resolver->query(["query" => $query], $auth_token_provider, ["ignore_auth" => true]);
+		$response = $query_resolver->query( [ 'query' => $query ], $auth_token_provider, [ 'ignore_auth' => true ] );
 
-		if (is_wp_error($response) || 200 !== wp_remote_retrieve_response_code($response) ) {
+		if ( is_wp_error( $response ) || 200 !== wp_remote_retrieve_response_code( $response ) ) {
 			add_action( 'admin_notices', [ 'FontAwesomeElementorAddon\Compatibility', 'admin_notice_api_service_requirement' ] );
 			return false;
 		}
@@ -80,22 +80,22 @@ class Compatibility {
 	}
 
 	private static function check_compatibility_wp_filesystem(): bool {
-		if (!function_exists("WP_Filesystem")) {
-    		require_once ABSPATH . "wp-admin/includes/file.php";
-    	}
+		if ( ! function_exists( 'WP_Filesystem' ) ) {
+			require_once ABSPATH . 'wp-admin/includes/file.php';
+		}
 
-	    if (!WP_Filesystem(false)) {
+		if ( ! WP_Filesystem( false ) ) {
 			add_action( 'admin_notices', [ 'FontAwesomeElementorAddon\Compatibility', 'admin_notice_wp_filesystem_requirement' ] );
 			return false;
-	    }
+		}
 
 		return true;
 	}
 
-	private static function check_compatibility_wp_upload_dir($wp_filesystem): bool {
+	private static function check_compatibility_wp_upload_dir( $wp_filesystem ): bool {
 		$upload_dir = wp_upload_dir( null, false, false );
 
-		if ( !is_array($upload_dir) || (isset( $upload_dir['error'] ) && false !== $upload_dir['error']) || !isset( $upload_dir['basedir'] ) || !isset( $upload_dir['baseurl'] ) || !$wp_filesystem->is_dir( $upload_dir['basedir'] ) || !$wp_filesystem->is_writable( $upload_dir['basedir'] ) ) {
+		if ( ! is_array( $upload_dir ) || ( isset( $upload_dir['error'] ) && false !== $upload_dir['error'] ) || ! isset( $upload_dir['basedir'] ) || ! isset( $upload_dir['baseurl'] ) || ! $wp_filesystem->is_dir( $upload_dir['basedir'] ) || ! $wp_filesystem->is_writable( $upload_dir['basedir'] ) ) {
 			add_action( 'admin_notices', [ 'FontAwesomeElementorAddon\Compatibility', 'admin_notice_wp_upload_dir_requirement' ] );
 			return false;
 		}
@@ -103,28 +103,29 @@ class Compatibility {
 		return true;
 	}
 
-	private static function check_compatibility_temp_dir($wp_filesystem): bool {
+	private static function check_compatibility_temp_dir( $wp_filesystem ): bool {
 		// Check for temp dir write access.
 		$base_temp_dir = get_temp_dir();
 
-  		$temp_dir =
-            $base_temp_dir .
-            "fontawesome-elementor-addon-" .
-            wp_generate_uuid4() .
-            "/";
+		$temp_dir =
+			$base_temp_dir .
+			'fontawesome-elementor-addon-' .
+			wp_generate_uuid4() .
+			'/';
 
-        $was_temp_dir_created = $wp_filesystem->mkdir($temp_dir);
+		$was_temp_dir_created = $wp_filesystem->mkdir( $temp_dir );
 
-        if (!$was_temp_dir_created) {
-        	add_action( 'admin_notices', [ 'FontAwesomeElementorAddon\Compatibility', 'admin_notice_temp_dir_requirement' ] );
+		if ( ! $was_temp_dir_created ) {
+			add_action( 'admin_notices', [ 'FontAwesomeElementorAddon\Compatibility', 'admin_notice_temp_dir_requirement' ] );
 			return false;
-        }
+		}
 
-        try {
-        	$wp_filesystem->delete($temp_dir, true);
-        } catch (\Exception $e) {}
+		try {
+			$wp_filesystem->delete( $temp_dir, true );
+		} catch ( \Exception $e ) {
+		}
 
-        return true;
+		return true;
 	}
 
 	/**
@@ -137,14 +138,16 @@ class Compatibility {
 	 */
 	public static function admin_notice_minimum_php_version(): void {
 
-		if ( isset( $_GET['activate'] ) ) unset( $_GET['activate'] );
+		if ( isset( $_GET['activate'] ) ) {
+			unset( $_GET['activate'] );
+		}
 
 		$message = sprintf(
 			/* translators: 1: Plugin name 2: PHP 3: Required PHP version */
 			esc_html__( '"%1$s" requires "%2$s" version %3$s or greater.', 'fontawesome-elementor-addon' ),
 			'<strong>' . esc_html__( 'Font Awesome Elementor Addon', 'fontawesome-elementor-addon' ) . '</strong>',
 			'<strong>' . esc_html__( 'PHP', 'fontawesome-elementor-addon' ) . '</strong>',
-			 self::MINIMUM_PHP_VERSION
+			self::MINIMUM_PHP_VERSION
 		);
 
 		printf( '<div class="notice notice-warning is-dismissible"><p>%1$s</p></div>', $message );
@@ -159,7 +162,9 @@ class Compatibility {
 	 * @access public
 	 */
 	public static function admin_notice_wp_filesystem_requirement(): void {
-		if ( isset( $_GET['activate'] ) ) unset( $_GET['activate'] );
+		if ( isset( $_GET['activate'] ) ) {
+			unset( $_GET['activate'] );
+		}
 
 		$message = sprintf(
 			/* translators: 1: Plugin name */
@@ -179,7 +184,9 @@ class Compatibility {
 	 * @access public
 	 */
 	public static function admin_notice_wp_upload_dir_requirement(): void {
-		if ( isset( $_GET['activate'] ) ) unset( $_GET['activate'] );
+		if ( isset( $_GET['activate'] ) ) {
+			unset( $_GET['activate'] );
+		}
 
 		$message = sprintf(
 			/* translators: 1: Plugin name */
@@ -199,7 +206,9 @@ class Compatibility {
 	 * @access public
 	 */
 	public static function admin_notice_temp_dir_requirement(): void {
-		if ( isset( $_GET['activate'] ) ) unset( $_GET['activate'] );
+		if ( isset( $_GET['activate'] ) ) {
+			unset( $_GET['activate'] );
+		}
 
 		$message = sprintf(
 			/* translators: 1: Plugin name */
@@ -219,7 +228,9 @@ class Compatibility {
 	 * @access public
 	 */
 	public static function admin_notice_api_service_requirement(): void {
-		if ( isset( $_GET['activate'] ) ) unset( $_GET['activate'] );
+		if ( isset( $_GET['activate'] ) ) {
+			unset( $_GET['activate'] );
+		}
 
 		$message = sprintf(
 			/* translators: 1: Plugin name */
