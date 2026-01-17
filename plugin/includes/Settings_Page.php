@@ -35,7 +35,7 @@ class Settings_Page {
 		return self::$_instance;
 	}
 
-  public function __construct() { /* noop */ }
+  private function __construct() { /* noop */ }
 
   public function init() {
 	  add_action('admin_menu', fn () => $this->add_menu() );
