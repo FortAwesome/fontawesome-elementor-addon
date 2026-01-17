@@ -54,7 +54,6 @@ class Settings_Page {
 
   private function register_settings() {
     $general_section_name = 'fontawesome_elementor_addon_general_section';
-    $kit_setup_section_name = 'fontawesome_elementor_addon_kit_setup_section';
 
     register_setting(
       self::SETTINGS_GROUP,
@@ -94,25 +93,6 @@ class Settings_Page {
       self::PAGE_SLUG,
       $general_section_name
     );
-
-    add_settings_section(
-      $kit_setup_section_name,
-      'Kit Setup',
-      function () {
-      ?>
-        <div class="fontawesome-elementor-addon-kit-setup">
-          <button type="button" class="button button-secondary" id="fontawesome-elementor-addon-kit-setup-start">
-            Setup Kit
-          </button>
-
-          <span class="spinner" id="fontawesome-elementor-addon-kit-setup-spinner" style="float:none;"></span>
-
-          <span id="fontawesome-elementor-addon-kit-setup-status" style="margin-left:8px;"></span>
-        </div>
-      <?php
-      },
-      self::PAGE_SLUG
-    );
   }
 
   private function render_page() {
@@ -125,7 +105,25 @@ class Settings_Page {
       do_settings_sections(self::PAGE_SLUG);
       submit_button();
     echo '</form>';
+
+    $this->render_kit_setup_section();
+
     echo '</div>';
+  }
+
+  private function render_kit_setup_section() {
+    ?>
+    <h2>Kit Setup</h2>
+    <div class="fontawesome-elementor-addon-kit-setup">
+      <button type="button" class="button button-secondary" id="fontawesome-elementor-addon-kit-setup-start">
+        Setup Kit
+      </button>
+
+      <span class="spinner" id="fontawesome-elementor-addon-kit-setup-spinner" style="float:none;"></span>
+
+      <span id="fontawesome-elementor-addon-kit-setup-status" style="margin-left:8px;"></span>
+    </div>
+    <?php
   }
 
   private function render_kit_token_field() {
