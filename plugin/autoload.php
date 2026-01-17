@@ -8,7 +8,7 @@ $configured_vendor_dir = getenv( 'COMPOSER_VENDOR_DIR' );
 
 $vendor_dir = $configured_vendor_dir;
 
-if ( ! is_string( $configured_vendor_dir ) || $configured_vendor_dir === '' ) {
+if ( ! is_string( $configured_vendor_dir ) || '' === $configured_vendor_dir ) {
 	$vendor_dir = trailingslashit( __DIR__ ) . 'vendor';
 }
 

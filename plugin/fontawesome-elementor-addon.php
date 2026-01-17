@@ -1,5 +1,4 @@
 <?php
-
 /**
  * Plugin Name:                Font Awesome Elementor Addon
  * Plugin URI:                 https://fontawesome.com/
@@ -23,7 +22,7 @@ add_action('elementor/init', function () {
 
 add_action('admin_enqueue_scripts', function( $hook ) {
 	require_once __DIR__ . '/autoload.php';
-	if ( $hook !== 'settings_page_' . \FontAwesomeElementorAddon\Settings_Page::PAGE_SLUG ) {
+	if ( 'settings_page_' . \FontAwesomeElementorAddon\Settings_Page::PAGE_SLUG !== $hook ) {
 		return;
 	}
 

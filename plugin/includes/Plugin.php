@@ -120,7 +120,7 @@ final class Plugin {
 			delete_user_meta( $user_id, '_fontawesome_elementor_addon_editor_error' );
 		}
 
-		wp_send_json_success( $notice ?: null );
+		wp_send_json_success( $notice ? $notice : null );
 	}
 
 	private function replace_font_awesome_native( $settings ) {
@@ -212,9 +212,6 @@ final class Plugin {
 		return $option;
 	}
 
-	// We have to add ours as "additional_tabs". Otherwise, their render_callback won't be used
-	// on initial insertion, because of Elementor's logic in:
-	// get_icon_manager_tabs()
 	private function replace_font_awesome_additional_tabs() {
 		$kit_metadata = $this->kit_metadata();
 		$upload_dir = $this->upload_dir();
@@ -531,7 +528,7 @@ final class Plugin {
 			return '.' . $family_style['prefix'];
 		}, $kit_metadata['included_family_styles']);
 
-		$filtered_css_selector_parts = array_filter( $css_selector_parts, fn( $part ) => is_string( $part ) && $part !== '' );
+		$filtered_css_selector_parts = array_filter( $css_selector_parts, fn( $part ) => is_string( $part ) && '' !== $part );
 
 		$is_selector = implode( ',', $filtered_css_selector_parts );
 
@@ -573,7 +570,7 @@ EOT;
 			return Family_Style::map_family_and_style_to_asset_file_stem( $family_style['family'], $family_style['style'] );
 		}, $data['included_family_styles']);
 
-		$filtered_stylesheet_file_stems = array_filter( $stylesheet_file_stems, fn( $stem ) => is_string( $stem ) && $stem !== '' );
+		$filtered_stylesheet_file_stems = array_filter( $stylesheet_file_stems, fn( $stem ) => is_string( $stem ) && '' !== $stem );
 
 		$urls = [
 			trailingslashit( $data['kit_assets_relative_url'] ) . 'css/fontawesome.min.css',
