@@ -8,6 +8,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 
 use FontAwesomeLib\Query_Resolver;
 use FontAwesomeLib\Auth_Token_Provider;
+use FontAwesomeLib\Crypto;
 
 class Compatibility {
 	/**
@@ -39,6 +40,15 @@ class Compatibility {
 		}
 
 		if ( ! self::check_compatibility_api_service() ) {
+			return false;
+		}
+
+		$crypto = new Crypto( [
+			'key' => LOGGED_IN_KEY,
+			'salt' => LOGGED_IN_SALT,
+		] );
+
+		if ( ! $crypto->is_compatible() ) {
 			return false;
 		}
 
