@@ -86,14 +86,6 @@ class Settings_Page {
 			self::PAGE_SLUG,
 			$general_section_name
 		);
-
-		add_settings_field(
-			'load',
-			'Load',
-			fn () => $this->render_load_field(),
-			self::PAGE_SLUG,
-			$general_section_name
-		);
 	}
 
 	private function render_page() {
@@ -151,16 +143,5 @@ class Settings_Page {
 			esc_attr( $api_token )
 		);
 		echo '<p class="description">Paste your Font Awesome API token here.</p>';
-	}
-
-	private function render_load_field() {
-		$opts = Options::get_options_with_defaults();
-		$name = Options::option_name() . '[load]';
-		printf(
-			'<label><input type="checkbox" name="%s" value="1" %s /> Enable loading</label>',
-			esc_attr( $name ),
-			checked( 1, (int) $opts['load'], false )
-		);
-		echo '<p class="description">If enabled, the plugin will load Webfont + CSS asset on front end pages.</p>';
 	}
 }
