@@ -6,8 +6,8 @@ if ( ! defined( 'ABSPATH' ) ) {
 	exit; // Exit if accessed directly.
 }
 
-use FontAwesomeLib\Base\Query_Resolver_Base;
-use FontAwesomeLib\Base\Auth_Token_Provider_Base;
+use FontAwesomeLib\Query_Resolver;
+use FontAwesomeLib\Auth_Token_Provider;
 
 class Compatibility {
 	/**
@@ -59,8 +59,8 @@ class Compatibility {
 	}
 
 	private static function check_compatibility_api_service(): bool {
-		$query_resolver = new Query_Resolver_Base();
-		$auth_token_provider = new Auth_Token_Provider_Base( 'FAKE_API_TOKEN' );
+		$query_resolver = new Query_Resolver();
+		$auth_token_provider = new Auth_Token_Provider( 'FAKE_API_TOKEN' );
 		$query = <<<'EOT'
         query {
           release(version: "7.x") {

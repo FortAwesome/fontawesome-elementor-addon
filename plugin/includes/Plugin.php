@@ -6,8 +6,8 @@ if ( ! defined( 'ABSPATH' ) ) {
 	exit; // Exit if accessed directly.
 }
 
-use FontAwesomeLib\Base\Query_Resolver_Base;
-use FontAwesomeLib\Base\Auth_Token_Provider_Base;
+use FontAwesomeLib\Query_Resolver;
+use FontAwesomeLib\Auth_Token_Provider;
 use FontAwesomeLib\Svg_icon;
 use FontAwesomeLib\Family_Style;
 use FontAwesomeLib\Family_Style_Collection;

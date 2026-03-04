@@ -6,10 +6,9 @@ if ( ! defined( 'ABSPATH' ) ) {
 	exit; // Exit if accessed directly.
 }
 
-use FontAwesomeLib\Base\Query_Resolver_Base;
-use FontAwesomeLib\Base\Auth_Token_Provider_Base;
+use FontAwesomeLib\Query_Resolver;
+use FontAwesomeLib\Auth_Token_Provider;
 use FontAwesomeLib\Kit_Download;
-use FontAwesomeLib\Crypto;
 use FontAwesomeElementorAddon\Options;
 
 class Setup_Kit {
@@ -48,7 +47,7 @@ class Setup_Kit {
 
 		$kit_token = $option['kit_token'];
 
-		$token_provider = new Auth_Token_Provider_Base( $api_token );
+		$token_provider = new Auth_Token_Provider( $api_token );
 		$access_token = $token_provider->get_access_token();
 
 		if ( is_wp_error( $access_token ) ) {
@@ -60,7 +59,7 @@ class Setup_Kit {
 			return;
 		}
 
-		$query_resolver = new Query_Resolver_Base();
+		$query_resolver = new Query_Resolver();
 
 		$kit_download = Kit_Download::create_kit_download( $query_resolver, $token_provider, $kit_token );
 
@@ -123,9 +122,9 @@ class Setup_Kit {
 			$build_id
 		);
 
-		$token_provider = new Auth_Token_Provider_Base( $api_token );
+		$token_provider = new Auth_Token_Provider( $api_token );
 
-		$query_resolver = new Query_Resolver_Base();
+		$query_resolver = new Query_Resolver();
 
 		$poll_result = $kit_download->poll( $query_resolver, $token_provider );
 
