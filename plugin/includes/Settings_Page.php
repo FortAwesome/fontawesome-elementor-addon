@@ -110,8 +110,8 @@ class Settings_Page {
 		?>
 	<h2>Kit Setup</h2>
 	<div class="fontawesome-elementor-addon-kit-setup">
-	    <p>After saving any changes, click "Setup Kit" to automatically download and install the kit for self-hosting on your WordPress server.</p>
-	    <p>When it's done, you can expect to see the changes reflected in the Elementor Icon Library.</p>
+		<p>After saving any changes, click "Setup Kit" to automatically download and install the kit for self-hosting on your WordPress server.</p>
+		<p>When it's done, you can expect to see the changes reflected in the Elementor Icon Library.</p>
 		<button type="button" class="button button-secondary" id="fontawesome-elementor-addon-kit-setup-start">
 		Setup Kit
 		</button>
