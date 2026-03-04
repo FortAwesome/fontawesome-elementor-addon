@@ -47,21 +47,12 @@
     }
   },
   "require": {
-    "fortawesome/wordpress-fontawesome-lib": "*"
+    "fortawesome/wordpress-fontawesome-lib": "^0.1"
   },
   "autoload": {
     "psr-4": {
       "FontAwesomeElementorAddon\\": "includes/"
     },
     "classmap": []
-  },
-  "repositories": [
-    {
-      "type": "path",
-      "url": "../wordpress-fontawesome-lib",
-      "options": {
-        "symlink": true
-      }
-    }
-  ]
+  }
 }
