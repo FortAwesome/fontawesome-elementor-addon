@@ -6,4 +6,4 @@ DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )"
 PLUGIN_DIR="$(realpath "$DIR/../plugin")"
 DIST_DIR="$PLUGIN_DIR/wp-dist"
 
-zip -r "$PLUGIN_DIR/fontawesome-elementor-addon.zip" "$DIST_DIR"
+( cd "$DIST_DIR" && zip -r "$PLUGIN_DIR/fontawesome-elementor-addon.zip" . )
