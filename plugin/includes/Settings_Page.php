@@ -105,9 +105,20 @@ class Settings_Page {
 		submit_button();
 		echo '</form>';
 
-		$has_kit_been_set_up = Setup_Kit::has_kit_been_set_up('abc123');
+		$opts = Options::get_options_with_defaults();
+		$kit_token = $opts['kit_token'] ?? null;
+		$api_token = $opts['api_token'] ?? null;
+		$build_id = $opts['build_id'] ?? null;
+		$last_kit_refresh_at = $opts['last_kit_refresh_at'] ?? null;
+		$is_configured = is_string( $kit_token ) && '' !== $kit_token && is_string( $api_token ) && '' !== $api_token;
 
-		$this->render_kit_setup_section( [ "has_kit_been_set_up" => $has_kit_been_set_up ] );
+		$has_kit_been_set_up = Setup_Kit::has_kit_been_set_up($kit_token, $build_id);
+
+		$this->render_kit_setup_section( [
+			"is_configured" => $is_configured,
+			"has_kit_been_set_up" => $has_kit_been_set_up,
+			"last_kit_refresh_at" => $last_kit_refresh_at,
+		] );
 
 		echo '</div>';
 	}
@@ -116,7 +127,8 @@ class Settings_Page {
 		$is_configured = is_array( $params ) ?  boolval ( $params["is_configured"] ?? false ) : false;
 		$is_form_changed = is_array( $params ) ?  boolval ( $params["is_form_changed"] ?? false ) : false;
 		$has_kit_been_set_up = is_array( $params ) ?  boolval ( $params["has_kit_been_set_up"] ?? false ) : false;
-		$kit_last_refreshed_at = is_array( $params ) ?  ( $params["kit_last_refreshed_at"] ?? null ) : null;
+		$last_kit_refresh_at = is_array( $params ) ?  ( $params["last_kit_refresh_at"] ?? null ) : null;
+		$last_kit_refresh_at_formatted = is_int( $last_kit_refresh_at ) ? Options::format_unix_timestamp( $last_kit_refresh_at ) : null;
 
 		$button_label = ( $is_configured && $has_kit_been_set_up )
 			? esc_html__( 'Refresh Setup', 'fontawesome-elementor-addon' )
@@ -141,9 +153,9 @@ class Settings_Page {
 
 		<span id="fontawesome-elementor-addon-kit-setup-status" style="margin-left:8px;"></span>
 		</div>
-		<?php if ( $kit_last_refreshed_at ) : ?>
+		<?php if ( $last_kit_refresh_at_formatted ) : ?>
 		<div>
-		Last refreshed at: <?= $kit_last_refreshed_at ?>
+			Last refreshed at: <span id="fontawesome-elementor-addon-last-kit-refresh-at"><?= $last_kit_refresh_at_formatted ?></span>
 		</div>
 		<?php endif; ?>
 	</div>

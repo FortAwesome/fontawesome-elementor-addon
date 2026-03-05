@@ -186,6 +186,7 @@ class Setup_Kit {
 		$option['build_id'] = $kit_download->get_build_id();
 		$last_kit_refresh_at = time();
 		$option['last_kit_refresh_at'] = $last_kit_refresh_at;
+		$last_kit_refresh_at_formatted = Options::format_unix_timestamp( $last_kit_refresh_at );
 
 		$update_result = update_option( Options::option_name(), $option );
 
@@ -205,7 +206,7 @@ class Setup_Kit {
 			}
 		}
 
-		wp_send_json_success( [ 'done' => true, 'last_kit_refresh_at' => $last_kit_refresh_at ] );
+		wp_send_json_success( [ 'done' => true, 'last_kit_refresh_at_formatted' => $last_kit_refresh_at_formatted ] );
 
 		return;
 	}

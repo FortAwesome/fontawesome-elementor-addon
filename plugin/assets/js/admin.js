@@ -42,17 +42,12 @@
           if (data.done) {
             setBusy(false);
             $("#fontawesome-elementor-addon-kit-setup-status").text("Done.");
-            const lastKitRefreshAtUnixEpochSeconds = data?.last_kit_refresh_at;
+            const lastKitRefreshAtFormatted =
+              data?.last_kit_refresh_at_formatted;
 
-            if (
-              lastKitRefreshAtUnixEpochSeconds &&
-              Number.isInteger(lastKitRefreshAtUnixEpochSeconds)
-            ) {
-              const lastKitRefreshAt = new Date(
-                lastKitRefreshAtUnixEpochSeconds * 1000,
-              );
+            if (lastKitRefreshAtFormatted) {
               $("#fontawesome-elementor-addon-last-kit-refresh-at").text(
-                lastKitRefreshAt.toLocaleString(),
+                lastKitRefreshAtFormatted,
               );
             }
 
