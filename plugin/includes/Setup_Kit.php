@@ -10,13 +10,61 @@ use FontAwesomeLib\Query_Resolver;
 use FontAwesomeLib\Auth_Token_Provider;
 use FontAwesomeLib\Kit_Download;
 use FontAwesomeElementorAddon\Options;
+use \WP_Error;
+use \WP_Filesystem;
 
 class Setup_Kit {
 	/**
 	 * Check if a kit has already been set up by checking if the kit assets directory exists and is valid.
+	 * for the currently configured kit token and build id.
+	 *
+	 * @return bool|WP_Error True if a kit has been set up, WP_Error if there was an error checking the kit setup status.
 	 */
-	public static function has_kit_been_set_up( $kit_token ): bool {
-		return false;
+	public static function has_kit_been_set_up(): bool | WP_Error {
+		$option = \get_option( Options::option_name(), [] );
+		$kit_assets_relative_dir = $option['kit_assets_relative_dir'] ?? null;
+		$kit_token = $option['kit_token'] ?? null;
+		$build_id = $option['build_id'] ?? null;
+		$upload_base_dir = self::get_upload_base_dir();
+
+		if ( \is_wp_error( $upload_base_dir) ) {
+			return $upload_base_dir;
+		}
+
+		if ( ! function_exists( 'WP_Filesystem' ) ) {
+			require_once ABSPATH . 'wp-admin/includes/file.php';
+		}
+
+		if ( ! WP_Filesystem( false ) ) {
+			return new WP_Error(
+				'fontawesome_elementor_addon_wp_filesystem_error',
+				__(
+					'There was an error initializing the WP Filesystem to access the uploads directory.',
+					'fontawesome-elementor-addon'
+				),
+			);
+		}
+
+		global $wp_filesystem;
+
+		$kit_json_path = trailingslashit( $upload_base_dir ) . trailingslashit( $kit_assets_relative_dir ) . "metadata/kit.json";
+
+		$kit_json = $wp_filesystem->get_contents( $kit_json_path );
+
+		if ( false === $kit_json ) {
+			return false;
+		}
+
+		$data = json_decode( $kit_json, true );
+
+		if ( json_last_error() !== JSON_ERROR_NONE ) {
+			return false;
+		}
+
+		$metadata_build_id = $data['build_id'] ?? null;
+		$metadata_kit_token = $data['token'] ?? null;
+
+		return is_string( $build_id ) && is_string( $kit_token ) && $build_id === $metadata_build_id && $kit_token === $metadata_kit_token;
 	}
 
 	public static function start(): void {
@@ -114,13 +162,10 @@ class Setup_Kit {
 			], 500);
 		}
 
-		$upload_dir = \wp_upload_dir( null, false, false );
+		$upload_base_dir = self::get_upload_base_dir();
 
-		if ( isset( $upload_dir['error'] ) && false !== $upload_dir['error'] ) {
-			wp_send_json_error([
-				'message' =>
-				__( 'There was an error initializing the uploads directory for setting up the Font Awesome Kit', 'fontawesome-elementor-addon' ),
-			], 500);
+		if ( is_wp_error( $upload_base_dir ) ) {
+			wp_send_json_error( $upload_base_dir, 500);
 			return;
 		}
 
@@ -154,8 +199,6 @@ class Setup_Kit {
 			wp_send_json_success( [ 'ready' => false ] );
 			return;
 		}
-
-		$upload_base_dir = $upload_dir['basedir'];
 
 		$kit_assets_absolute_dir = $kit_download->download_and_prepare_selfhosting( $query_resolver, $token_provider, $upload_base_dir );
 
@@ -209,5 +252,21 @@ class Setup_Kit {
 		wp_send_json_success( [ 'done' => true, 'last_kit_refresh_at_formatted' => $last_kit_refresh_at_formatted ] );
 
 		return;
+	}
+
+	private static function get_upload_base_dir(): string | WP_Error {
+		$upload_dir = \wp_upload_dir( null, false, false );
+
+		if ( isset( $upload_dir['error'] ) && false !== $upload_dir['error'] ) {
+			return new WP_Error(
+				'fontawesome_elementor_addon_upload_dir_error',
+				__(
+					'There was an error initializing the uploads directory for setting up the Font Awesome Kit',
+					'fontawesome-elementor-addon'
+				),
+			);
+		}
+
+		return $upload_dir['basedir'];
 	}
 }
