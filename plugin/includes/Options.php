@@ -79,6 +79,8 @@ class Options {
 		$defaults = [
 			'kit_token' => '',
 			'api_token' => '',
+			'build_id' => '',
+			'last_kit_refresh_at' => '',
 			'load'  => 0,
 			'option_schema_version' => self::OPTION_SCHEMA_VERSION,
 		];

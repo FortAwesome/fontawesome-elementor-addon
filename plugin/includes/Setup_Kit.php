@@ -176,6 +176,8 @@ class Setup_Kit {
 		unset( $option['api_token'] );
 
 		$option['kit_assets_relative_dir'] = $kit_assets_relative_dir;
+		$option['build_id'] = $kit_download->get_build_id();
+		$option['last_kit_refresh_at'] = time();
 
 		$update_result = update_option( Options::option_name(), $option );
 
