@@ -25,6 +25,13 @@ class Setup_Kit {
 		$kit_assets_relative_dir = $option['kit_assets_relative_dir'] ?? null;
 		$kit_token = $option['kit_token'] ?? null;
 		$build_id = $option['build_id'] ?? null;
+
+		if ( ! is_string( $kit_assets_relative_dir ) || '' === $kit_assets_relative_dir
+			|| ! is_string( $kit_token ) || '' === $kit_token
+			|| ! is_string( $build_id ) || '' === $build_id ) {
+			return false;
+		}
+
 		$upload_base_dir = self::get_upload_base_dir();
 
 		if ( \is_wp_error( $upload_base_dir) ) {
