@@ -184,7 +184,8 @@ class Setup_Kit {
 
 		$option['kit_assets_relative_dir'] = $kit_assets_relative_dir;
 		$option['build_id'] = $kit_download->get_build_id();
-		$option['last_kit_refresh_at'] = time();
+		$last_kit_refresh_at = time();
+		$option['last_kit_refresh_at'] = $last_kit_refresh_at;
 
 		$update_result = update_option( Options::option_name(), $option );
 
@@ -204,7 +205,7 @@ class Setup_Kit {
 			}
 		}
 
-		wp_send_json_success( [ 'done' => true ] );
+		wp_send_json_success( [ 'done' => true, 'last_kit_refresh_at' => $last_kit_refresh_at ] );
 
 		return;
 	}
