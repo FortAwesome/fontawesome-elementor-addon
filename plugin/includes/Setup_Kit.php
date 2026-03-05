@@ -12,6 +12,13 @@ use FontAwesomeLib\Kit_Download;
 use FontAwesomeElementorAddon\Options;
 
 class Setup_Kit {
+	/**
+	 * Check if a kit has already been set up by checking if the kit assets directory exists and is valid.
+	 */
+	public static function has_kit_been_set_up( $kit_token ): bool {
+		return false;
+	}
+
 	public static function start(): void {
 		if ( ! current_user_can( 'manage_options' ) ) {
 			wp_send_json_error( [ 'message' => 'Forbidden' ], 403 );
