@@ -6,6 +6,8 @@ if ( ! defined( 'ABSPATH' ) ) {
 	exit; // Exit if accessed directly.
 }
 
+use FontAwesomeElementorAddon\Setup_Kit;
+
 class Settings_Page {
 	const PAGE_SLUG = 'fontawesome-elementor-addon-settings';
 	const SETTINGS_GROUP = 'fontawesome_elementor_addon_settings_group';
@@ -64,16 +66,19 @@ class Settings_Page {
 
 		add_settings_section(
 			$general_section_name,
-			'General',
+			'Font Awesome Elementor Addon',
 			function () {
-				echo '<p>Configure the plugin.</p>';
+				printf(
+					'<p>%s</p>',
+					esc_html__( 'Easily import your Font Awesome Kit into the Elementor Icon Library.', 'fontawesome-elementor-addon' )
+				);
 			},
 			self::PAGE_SLUG
 		);
 
 		add_settings_field(
 			'api_token',
-			'API Token',
+			__( 'API Token', 'fontawesome-elementor-addon' ),
 			fn () => $this->render_api_token_field(),
 			self::PAGE_SLUG,
 			$general_section_name
@@ -81,7 +86,7 @@ class Settings_Page {
 
 		add_settings_field(
 			'kit_token',
-			'Kit Token',
+			__( 'Kit Token', 'fontawesome-elementor-addon' ),
 			fn () => $this->render_kit_token_field(),
 			self::PAGE_SLUG,
 			$general_section_name
@@ -94,31 +99,53 @@ class Settings_Page {
 		}
 
 		echo '<div class="wrap">';
-		echo '<h1>Font Awesome Elementor Addon Settings</h1>';
 		echo '<form method="post" action="options.php">';
 		settings_fields( self::SETTINGS_GROUP );
 		do_settings_sections( self::PAGE_SLUG );
 		submit_button();
 		echo '</form>';
 
-		$this->render_kit_setup_section();
+		$has_kit_been_set_up = Setup_Kit::has_kit_been_set_up('abc123');
+
+		$this->render_kit_setup_section( [ "has_kit_been_set_up" => $has_kit_been_set_up ] );
 
 		echo '</div>';
 	}
 
-	private function render_kit_setup_section() {
+	private function render_kit_setup_section( $params = [] ) {
+		$is_configured = is_array( $params ) ?  boolval ( $params["is_configured"] ?? false ) : false;
+		$is_form_changed = is_array( $params ) ?  boolval ( $params["is_form_changed"] ?? false ) : false;
+		$has_kit_been_set_up = is_array( $params ) ?  boolval ( $params["has_kit_been_set_up"] ?? false ) : false;
+		$kit_last_refreshed_at = is_array( $params ) ?  ( $params["kit_last_refreshed_at"] ?? null ) : null;
+
+		$button_label = ( $is_configured && $has_kit_been_set_up )
+			? esc_html__( 'Refresh Setup', 'fontawesome-elementor-addon' )
+			: esc_html__( 'Setup Kit', 'fontawesome-elementor-addon' );
+		$button_disabled_attr = ! $is_configured ? 'disabled' : '';
 		?>
-	<h2>Kit Setup</h2>
+	<h2><?= esc_html__('Kit Setup', 'fontawesome-elementor-addon') ?></h2>
 	<div class="fontawesome-elementor-addon-kit-setup">
+	    <div>
 		<p>After saving any changes, click "Setup Kit" to automatically download and install the kit for self-hosting on your WordPress server.</p>
 		<p>When it's done, you can expect to see the changes reflected in the Elementor Icon Library.</p>
-		<button type="button" class="button button-secondary" id="fontawesome-elementor-addon-kit-setup-start">
+		<button
+		    type="button"
+			class="button button-secondary"
+			id="fontawesome-elementor-addon-kit-setup-start"
+			<?= esc_html__( $button_disabled_attr, 'fontawesome-elementor-addon' ) ?>
+		>
 		Setup Kit
 		</button>
 
 		<span class="spinner" id="fontawesome-elementor-addon-kit-setup-spinner" style="float:none;"></span>
 
 		<span id="fontawesome-elementor-addon-kit-setup-status" style="margin-left:8px;"></span>
+		</div>
+		<?php if ( $kit_last_refreshed_at ) : ?>
+		<div>
+		Last refreshed at: <?= $kit_last_refreshed_at ?>
+		</div>
+		<?php endif; ?>
 	</div>
 		<?php
 	}
@@ -132,7 +159,10 @@ class Settings_Page {
 			esc_attr( $name ),
 			esc_attr( $kit_token )
 		);
-		echo '<p class="description">Paste your Kit token here.</p>';
+		printf(
+			'<p class="description">%s</p>',
+			esc_html__( 'Paste your Kit token here.', 'fontawesome-elementor-addon' )
+		);
 	}
 
 	private function render_api_token_field() {
@@ -144,6 +174,10 @@ class Settings_Page {
 			esc_attr( $name ),
 			esc_attr( $api_token )
 		);
-		echo '<p class="description">Paste your Font Awesome API token here.</p>';
+		printf(
+			'<p class="description">%s</p><p class="description">%s: Download Kits</p>',
+			esc_html__( 'Paste your Font Awesome API token here.', 'fontawesome-elementor-addon' ),
+			esc_html__( 'Make sure it has the required scope', 'fontawesome-elementor-addon' )
+		);
 	}
 }
