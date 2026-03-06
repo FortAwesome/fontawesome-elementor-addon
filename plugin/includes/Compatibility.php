@@ -156,15 +156,13 @@ class Compatibility {
 			unset( $_GET['activate'] );
 		}
 
-		$message = sprintf(
+		printf(
 			/* translators: 1: Plugin name 2: PHP 3: Required PHP version */
-			esc_html__( '"%1$s" requires "%2$s" version %3$s or greater.', 'fontawesome-elementor-addon' ),
-			'<strong>' . esc_html__( 'Font Awesome Elementor Addon', 'fontawesome-elementor-addon' ) . '</strong>',
-			'<strong>' . esc_html__( 'PHP', 'fontawesome-elementor-addon' ) . '</strong>',
-			self::MINIMUM_PHP_VERSION
+			'<div class="notice notice-warning is-dismissible"><p>%1$s requires %2$s version %3$s or greater.</p></div>',
+			esc_html__( 'Font Awesome Elementor Addon', 'fontawesome-elementor-addon' ),
+			esc_html( 'PHP' ),
+			esc_html( self::MINIMUM_PHP_VERSION )
 		);
-
-		printf( '<div class="notice notice-warning is-dismissible"><p>%1$s</p></div>', $message );
 	}
 
 	/**
@@ -185,11 +183,9 @@ class Compatibility {
 
 		printf(
 			/* translators: 1: Plugin name */
-			'<div class="notice notice-warning is-dismissible"><p><strong>"%1$s"</strong> requires that your WordPress site is configured to allow reading and writing files using WP_Filesystem.</p></div>',
+			'<div class="notice notice-warning is-dismissible"><p>%1$s requires that your WordPress site is configured to allow reading and writing files using WP_Filesystem.</p></div>',
 			esc_html__( 'Font Awesome Elementor Addon', 'fontawesome-elementor-addon' )
 		);
-
-		printf( '<div class="notice notice-warning is-dismissible"><p>%1$s</p></div>', $message );
 	}
 
 	/**
@@ -208,13 +204,11 @@ class Compatibility {
 			unset( $_GET['activate'] );
 		}
 
-		$message = sprintf(
+		printf(
 			/* translators: 1: Plugin name */
-			esc_html__( '"%1$s" requires that your WordPress site is configured to allow writing files under wp_upload_dir.', 'fontawesome-elementor-addon' ),
-			'<strong>' . esc_html__( 'Font Awesome Elementor Addon', 'fontawesome-elementor-addon' ) . '</strong>'
+			'<div class="notice notice-warning is-dismissible"><p>%1$s requires that your WordPress site is configured to allow writing files under wp_upload_dir.</p></div>',
+			esc_html__( 'Font Awesome Elementor Addon', 'fontawesome-elementor-addon' )
 		);
-
-		printf( '<div class="notice notice-warning is-dismissible"><p>%1$s</p></div>', $message );
 	}
 
 	/**
@@ -233,13 +227,11 @@ class Compatibility {
 			unset( $_GET['activate'] );
 		}
 
-		$message = sprintf(
+		printf(
 			/* translators: 1: Plugin name */
-			esc_html__( '"%1$s" requires that your WordPress site is configured to allow creating temporary files and directories.', 'fontawesome-elementor-addon' ),
-			'<strong>' . esc_html__( 'Font Awesome Elementor Addon', 'fontawesome-elementor-addon' ) . '</strong>'
+			'<div class="notice notice-warning is-dismissible"><p>%1$s requires that your WordPress site is configured to allow creating temporary files and directories</p></div>',
+			esc_html__( 'Font Awesome Elementor Addon', 'fontawesome-elementor-addon' )
 		);
-
-		printf( '<div class="notice notice-warning is-dismissible"><p>%1$s</p></div>', $message );
 	}
 
 	/**
@@ -258,12 +250,10 @@ class Compatibility {
 			unset( $_GET['activate'] );
 		}
 
-		$message = sprintf(
+		printf(
 			/* translators: 1: Plugin name */
-			esc_html__( '"%1$s" requires that your WordPress site can access the Font Awesome API service.', 'fontawesome-elementor-addon' ),
-			'<strong>' . esc_html__( 'Font Awesome Elementor Addon', 'fontawesome-elementor-addon' ) . '</strong>'
+			'<div class="notice notice-warning is-dismissible"><p>%1$s requires that your WordPress site can access the Font Awesome API service.</p></div>',
+			esc_html__( 'Font Awesome Elementor Addon', 'fontawesome-elementor-addon' )
 		);
-
-		printf( '<div class="notice notice-warning is-dismissible"><p>%1$s</p></div>', $message );
 	}
 }
