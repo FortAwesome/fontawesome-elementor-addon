@@ -41,7 +41,12 @@
 
           if (data.done) {
             setBusy(false);
-            $("#fontawesome-elementor-addon-kit-setup-status").text("Done.");
+            $("#fontawesome-elementor-addon-kit-setup-spinner").hide();
+            $("#fontawesome-elementor-addon-kit-setup-status").text("✓");
+            $("#fontawesome-elementor-addon-kit-setup-status").css(
+              "color",
+              "green",
+            );
             const lastKitRefreshAtFormatted =
               data?.last_kit_refresh_at_formatted;
 
@@ -59,6 +64,7 @@
           pollTimer = setTimeout(doPoll, delayMs);
         })
         .fail(function () {
+          $("#fontawesome-elementor-addon-kit-setup-spinner").hide();
           $("#fontawesome-elementor-addon-kit-setup-status").text(
             "Request failed.",
           );
@@ -79,6 +85,8 @@
       }
 
       setBusy(true);
+      $("#fontawesome-elementor-addon-kit-setup-status").css("color", "unset");
+      $("#fontawesome-elementor-addon-kit-setup-spinner").show();
       $("#fontawesome-elementor-addon-kit-setup-status").text("Starting…");
 
       $.post(FontawesomeElementorAddonAdmin.ajaxurl, {
