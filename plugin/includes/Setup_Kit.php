@@ -82,22 +82,17 @@ class Setup_Kit {
 
 		check_ajax_referer( 'fontawesome_elementor_addon_kit_setup_nonce', 'nonce' );
 
-		if ( ! Compatibility::is_compatible_for_setup() ) {
-			wp_send_json_error([
-				'message' =>
-				__( 'Font Awesome Elementor Addon is not compatible on this site.', 'fontawesome-elementor-addon' ),
-			], 500);
+		$compatibility = Compatibility::is_compatible_for_setup();
 
+		if ( \is_wp_error( $compatibility ) ) {
+			wp_send_json_error( $compatibility, 500);
 			return;
 		}
 
 		$api_token = Options::get_decrypted_api_token();
 
 		if ( is_wp_error( $api_token ) ) {
-			wp_send_json_error([
-				'message' =>
-				$api_token->get_error_message(),
-			], 500);
+			wp_send_json_error( $api_token, 500);
 		}
 
 		$option = get_option( Options::option_name(), [] );
@@ -113,11 +108,7 @@ class Setup_Kit {
 		$access_token = $token_provider->get_access_token();
 
 		if ( is_wp_error( $access_token ) ) {
-			wp_send_json_error([
-				'message' =>
-				$access_token->get_error_message(),
-			], 500);
-
+			wp_send_json_error( $access_token, 500);
 			return;
 		}
 
@@ -126,17 +117,11 @@ class Setup_Kit {
 		$kit_download = Kit_Download::create_kit_download( $query_resolver, $token_provider, $kit_token );
 
 		if ( is_wp_error( $kit_download ) ) {
-			wp_send_json_error([
-				'message' =>
-				$kit_download->get_error_message(),
-			], 500);
-
+			wp_send_json_error( $kit_download, 500);
 			return;
 		}
 
 		wp_send_json_success( [ 'build_id' => $kit_download->get_build_id() ] );
-
-		return;
 	}
 
 	public static function status() {
@@ -163,10 +148,7 @@ class Setup_Kit {
 		$api_token = Options::get_decrypted_api_token();
 
 		if ( is_wp_error( $api_token ) ) {
-			wp_send_json_error([
-				'message' =>
-				$api_token->get_error_message(),
-			], 500);
+			wp_send_json_error( $api_token, 500);
 		}
 
 		$upload_base_dir = self::get_upload_base_dir();
@@ -246,7 +228,7 @@ class Setup_Kit {
 			// Don't include the api_token in the comparison.
 			unset( $previous_option['api_token'] );
 
-			if ( $previous_option != $option ) {
+			if ( $previous_option !== $option ) {
 				wp_send_json_error( [
 					'message' =>
 											__( 'Your kit was successfully downloaded and set up on your WordPress server, but there was a problem updating the plugin options with the results. Try again?', 'fontawesome-elementor-addon' ),
@@ -261,7 +243,6 @@ class Setup_Kit {
 			'last_kit_refresh_at_formatted' => $last_kit_refresh_at_formatted,
 		] );
 
-		return;
 	}
 
 	private static function get_upload_base_dir(): string|WP_Error {
