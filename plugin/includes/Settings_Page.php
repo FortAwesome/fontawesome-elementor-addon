@@ -195,7 +195,7 @@ class Settings_Page {
 			type="button"
 			class="button button-secondary"
 			id="fontawesome-elementor-addon-kit-setup-start"
-			<?php echo !$is_configured ? 'disabled' : ''; ?>
+			<?php echo ! $is_configured ? 'disabled' : ''; ?>
 		>
 		<?php if ( $is_configured && $has_kit_been_set_up ) : ?>
 			<?php echo esc_html( $refresh_button_label ); ?>

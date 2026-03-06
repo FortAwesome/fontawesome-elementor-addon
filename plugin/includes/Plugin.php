@@ -665,7 +665,7 @@ EOT;
 		add_action( 'admin_notices', function () use ( $error ) {
 			?>
 			<div class="notice notice-error is-dismissible">
-			    <?php foreach ( $error->get_error_messages() as $message ) : ?>
+				<?php foreach ( $error->get_error_messages() as $message ) : ?>
 				<p>
 					<?php echo esc_html( $message ); ?>
 				</p>
