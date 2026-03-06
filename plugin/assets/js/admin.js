@@ -1,5 +1,6 @@
 (function ($) {
   let pollTimer = null;
+  const FAILED_MESSAGE = "💣 Failed";
 
   function setBusy(isBusy) {
     $("#fontawesome-elementor-addon-kit-setup-start").prop("disabled", isBusy);
@@ -66,7 +67,7 @@
         .fail(function () {
           $("#fontawesome-elementor-addon-kit-setup-spinner").hide();
           $("#fontawesome-elementor-addon-kit-setup-status").text(
-            "Request failed.",
+            FAILED_MESSAGE,
           );
           setBusy(false);
           pollTimer = null;
@@ -96,7 +97,7 @@
         .done(function (resp) {
           if (!resp || !resp.success) {
             $("#fontawesome-elementor-addon-kit-setup-status").text(
-              "Failed to start.",
+              FAILED_MESSAGE,
             );
             setBusy(false);
             return;
@@ -106,8 +107,9 @@
           poll(buildId);
         })
         .fail(function () {
+          $("#fontawesome-elementor-addon-kit-setup-spinner").hide();
           $("#fontawesome-elementor-addon-kit-setup-status").text(
-            "Start request failed.",
+            FAILED_MESSAGE,
           );
           setBusy(false);
         });
