@@ -165,12 +165,33 @@ class Settings_Page {
 			? esc_html__( 'Refresh Setup', 'fontawesome-elementor-addon' )
 			: esc_html__( 'Setup Kit', 'fontawesome-elementor-addon' );
 		$button_disabled_attr = ! $is_configured ? 'disabled' : '';
+		$refresh_button_label = esc_html__( 'Refresh Setup', 'fontawesome-elementor-addon' );
+		$setup_button_label = esc_html__( 'Setup Kit', 'fontawesome-elementor-addon' );
+
+		$initial_setup_message = sprintf(
+			/* translators: 1: button label */
+			esc_html__( 'After configuring above, click "%1$s" to automatically download and install the Kit for self-hosting on your WordPress server.', 'fontawesome-elementor-addon' ),
+			$setup_button_label
+		);
+
+		$refresh_message = sprintf(
+			/* translators: 1: button label */
+			esc_html__( 'After changing the Kit Token above or modifying your Kit, click "%1$s" to update the Kit\'s self-hosting on your WordPress server.', 'fontawesome-elementor-addon' ),
+			$refresh_button_label
+		);
+
 		?>
 	<h2><?php echo esc_html__( 'Kit Setup', 'fontawesome-elementor-addon' ); ?></h2>
 	<div class="fontawesome-elementor-addon-kit-setup">
 		<div>
-		<p>After saving any changes, click "Setup Kit" to automatically download and install the kit for self-hosting on your WordPress server.</p>
-		<p>When it's done, you can expect to see the changes reflected in the Elementor Icon Library.</p>
+		<p>
+		<?php if ( $is_configured && $has_kit_been_set_up ) : ?>
+			<?php echo $refresh_message; ?>
+		<?php else : ?>
+			<?= $initial_setup_message; ?>
+		<?php endif; ?>
+		</p>
+		<p>Once it's done, the Elementor Icon Library will reflect the changes.</p>
 		<button
 			type="button"
 			class="button button-secondary"
@@ -178,9 +199,9 @@ class Settings_Page {
 			<?php echo esc_html__( $button_disabled_attr, 'fontawesome-elementor-addon' ); ?>
 		>
 		<?php if ( $is_configured && $has_kit_been_set_up ) : ?>
-			<?php echo esc_html__( 'Refresh Setup', 'fontawesome-elementor-addon' ); ?>
+			<?php echo $refresh_button_label; ?>
 		<?php else : ?>
-			<?php echo esc_html__( 'Setup Kit', 'fontawesome-elementor-addon' ); ?>
+			<?php echo $setup_button_label; ?>
 		<?php endif; ?>
 		</button>
 
@@ -188,7 +209,7 @@ class Settings_Page {
 
 		<span id="fontawesome-elementor-addon-kit-setup-status" style="margin-left:8px;"></span>
 		</div>
-		<div>
+		<div style="margin-top: 1em; color: #797979; font-size: smaller;">
 			Last refreshed at: <span id="fontawesome-elementor-addon-last-kit-refresh-at">
 				<?php echo $last_kit_refresh_at_formatted ? $last_kit_refresh_at_formatted : 'never'; ?>
 			</span>
