@@ -164,7 +164,6 @@ class Settings_Page {
 		$button_label = ( $is_configured && $has_kit_been_set_up )
 			? esc_html__( 'Refresh Setup', 'fontawesome-elementor-addon' )
 			: esc_html__( 'Setup Kit', 'fontawesome-elementor-addon' );
-		$button_disabled_attr = ! $is_configured ? 'disabled' : '';
 		$refresh_button_label = esc_html__( 'Refresh Setup', 'fontawesome-elementor-addon' );
 		$setup_button_label = esc_html__( 'Setup Kit', 'fontawesome-elementor-addon' );
 
@@ -211,7 +210,7 @@ class Settings_Page {
 		</div>
 		<div style="margin-top: 1em; color: #797979; font-size: smaller;">
 			Last refreshed at: <span id="fontawesome-elementor-addon-last-kit-refresh-at">
-				<?php echo $last_kit_refresh_at_formatted ? $last_kit_refresh_at_formatted : 'never'; ?>
+				<?php echo esc_html( $last_kit_refresh_at_formatted ? $last_kit_refresh_at_formatted : 'never' ); ?>
 			</span>
 		</div>
 	</div>
