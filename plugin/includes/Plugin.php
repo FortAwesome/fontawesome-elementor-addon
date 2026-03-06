@@ -76,6 +76,8 @@ final class Plugin {
 		add_filter( 'elementor/icons_manager/native', fn ( $settings ) => $this->replace_font_awesome_native( $settings ) );
 		add_filter( 'elementor/icons_manager/additional_tabs', fn () => $this->replace_font_awesome_additional_tabs() );
 
+		$this->maybe_show_setup_notice();
+
 		if ( is_admin() ) {
 			Settings_Page::instance()->init();
 		}
@@ -617,5 +619,23 @@ EOT;
 		}
 
 		return $elementor_plugin->experiments->is_feature_active( 'e_font_icon_svg' );
+	}
+
+	private function maybe_show_setup_notice() {
+		$opts = Options::get_options_with_defaults();
+
+		$is_configured = is_array( $opts ) && $opts['kit_token'] ?? false && $opts['api_token'] ?? false;
+
+		if ( ! $is_configured ) {
+			add_filter( 'elementor/core/admin/notices', function ( array $notices ) {
+				$notice = new Notice(
+					'Foo',
+					'Bar'
+				);
+
+				$notices[] = $notice;
+				return $notices;
+			} );
+		}
 	}
 }
