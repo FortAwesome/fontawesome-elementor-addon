@@ -112,7 +112,8 @@ class Settings_Page {
 		$last_kit_refresh_at = $opts['last_kit_refresh_at'] ?? null;
 		$is_configured = is_string( $kit_token ) && '' !== $kit_token && is_string( $api_token ) && '' !== $api_token;
 
-		$has_kit_been_set_up = Setup_Kit::has_kit_been_set_up($kit_token, $build_id);
+		$has_kit_been_set_up_result = Setup_Kit::has_kit_been_set_up();
+		$has_kit_been_set_up = \is_wp_error( $has_kit_been_set_up_result ) ? false : $has_kit_been_set_up_result;
 
 		$this->render_kit_setup_section( [
 			"is_configured" => $is_configured,
@@ -146,18 +147,22 @@ class Settings_Page {
 			id="fontawesome-elementor-addon-kit-setup-start"
 			<?= esc_html__( $button_disabled_attr, 'fontawesome-elementor-addon' ) ?>
 		>
-		Setup Kit
+		<?php if ( $is_configured && $has_kit_been_set_up ) : ?>
+			<?= esc_html__( 'Refresh Setup', 'fontawesome-elementor-addon' ) ?>
+		<?php else : ?>
+			<?= esc_html__( 'Setup Kit', 'fontawesome-elementor-addon' ) ?>
+		<?php endif; ?>
 		</button>
 
 		<span class="spinner" id="fontawesome-elementor-addon-kit-setup-spinner" style="float:none;"></span>
 
 		<span id="fontawesome-elementor-addon-kit-setup-status" style="margin-left:8px;"></span>
 		</div>
-		<?php if ( $last_kit_refresh_at_formatted ) : ?>
 		<div>
-			Last refreshed at: <span id="fontawesome-elementor-addon-last-kit-refresh-at"><?= $last_kit_refresh_at_formatted ?></span>
+			Last refreshed at: <span id="fontawesome-elementor-addon-last-kit-refresh-at">
+				<?= $last_kit_refresh_at_formatted ? $last_kit_refresh_at_formatted : 'never' ?>
+			</span>
 		</div>
-		<?php endif; ?>
 	</div>
 		<?php
 	}
