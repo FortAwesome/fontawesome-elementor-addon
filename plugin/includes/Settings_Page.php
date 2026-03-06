@@ -68,12 +68,25 @@ class Settings_Page {
 
 		add_settings_section(
 			$general_section_name,
-			'Font Awesome Elementor Addon',
+			'',
 			function () {
+				?>
+				<h2 class="fontawesome-elementor-addon-section-title" style="font-size: 2em">Font Awesome Elementor Addon</h1>
+				<p>
+				<?php echo esc_html__( 'Easily use Font Awesome icons - including Pro! - with Elementor. Just add your API token and Kit token below to get started.', 'fontawesome-elementor-addon' ); ?>
+				</p>
+				<h2>Add Your Kit Details</h2>
+				<p>
+				<?php
 				printf(
-					'<p>%s</p>',
-					esc_html__( 'Easily import your Font Awesome Kit into the Elementor Icon Library.', 'fontawesome-elementor-addon' )
+					/* translators: 1: account tokes URL, 2: kits URL */
+					esc_html__( 'Visit your <a href="%1$s" target="_blank" rel="noopener noreferrer">Account on fontawesome.com</a> to get your API token, and <a href="%2$s" target="_blank" rel="noopener noreferrer">your Kits</a> to get the token for the Kit you want to use and enter them below.', 'fontawesome-elementor-addon' ),
+					esc_attr( 'https://fontawesome.com/account/tokens' ),
+					esc_attr( 'https://fontawesome.com/kits' )
 				);
+				?>
+				</p>
+				<?php
 			},
 			self::PAGE_SLUG
 		);
@@ -169,28 +182,32 @@ class Settings_Page {
 
 		$initial_setup_message = sprintf(
 			/* translators: 1: button label */
-			esc_html__( 'After configuring above, click "%1$s" to automatically download and install the Kit for self-hosting on your WordPress server.', 'fontawesome-elementor-addon' ),
+			__( 'After saving your API and Kit Token above, click "%1$s" to automatically download and install the Kit for self-hosting on your WordPress server.', 'fontawesome-elementor-addon' ),
 			$setup_button_label
 		);
 
 		$refresh_message = sprintf(
 			/* translators: 1: button label */
-			esc_html__( 'After changing the Kit Token above or modifying your Kit, click "%1$s" to update the Kit\'s self-hosting on your WordPress server.', 'fontawesome-elementor-addon' ),
+			__( 'After changing the Kit Token above or modifying your Kit, click "%1$s" to update the Kit\'s self-hosting on your WordPress server.', 'fontawesome-elementor-addon' ),
 			$refresh_button_label
 		);
 
+		$concluding_message = __( "Once it's done, the Elementor Icon Library will reflect the changes.", 'fontawesome-elementor-addon' );
 		?>
 	<h2><?php echo esc_html__( 'Kit Setup', 'fontawesome-elementor-addon' ); ?></h2>
 	<div class="fontawesome-elementor-addon-kit-setup">
 		<div>
 		<p>
-		<?php if ( $is_configured && $has_kit_been_set_up ) : ?>
-			<?php echo esc_html( $refresh_message ); ?>
-		<?php else : ?>
-			<?php echo esc_html( $initial_setup_message ); ?>
-		<?php endif; ?>
+		<?php
+		if ( $is_configured && $has_kit_been_set_up ) {
+			echo esc_html( $refresh_message );
+		} else {
+			echo esc_html( $initial_setup_message );
+		}
+
+			echo ' ' . esc_html( $concluding_message );
+		?>
 		</p>
-		<p>Once it's done, the Elementor Icon Library will reflect the changes.</p>
 		<button
 			type="button"
 			class="button button-secondary"
