@@ -631,7 +631,11 @@ EOT;
 
 		$is_plugin_settings_page = false;
 
+		// Ignore nonce verification here since we're only checking the presence of the 'page' query parameter
+		// to determine whether to show the notice, and this is not a state-changing action.
+		// phpcs:ignore WordPress.Security.NonceVerification.Recommended
 		if ( is_admin() && isset( $_GET['page'] ) ) {
+			// phpcs:ignore WordPress.Security.NonceVerification.Recommended
 			$page = sanitize_key( wp_unslash( $_GET['page'] ) );
 			$is_plugin_settings_page = ( Settings_Page::PAGE_SLUG === $page );
 		}
