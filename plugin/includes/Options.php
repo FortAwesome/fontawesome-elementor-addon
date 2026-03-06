@@ -153,7 +153,7 @@ class Options {
 		$local_date = $date->setTimezone( \wp_timezone() );
 
 		// Format using the site's date/time format settings
-		$format = \get_option( 'date_format' ) . ' ' . \get_option( 'time_format' );
+		$format = \get_option( 'date_format' ) . ' ' . \get_option( 'time_format' ) . ' T';
 
 		return $local_date->format( $format );
 	}
