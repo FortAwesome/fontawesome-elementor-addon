@@ -6,9 +6,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 	exit; // Exit if accessed directly.
 }
 
-use FontAwesomeLib\Query_Resolver;
-use FontAwesomeLib\Auth_Token_Provider;
-use FontAwesomeLib\Svg_icon;
+use FontAwesomeLib\Svg_Icon;
 use FontAwesomeLib\Family_Style;
 use FontAwesomeLib\Family_Style_Collection;
 use WP_Error;
