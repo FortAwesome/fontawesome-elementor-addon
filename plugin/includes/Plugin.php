@@ -644,8 +644,8 @@ EOT;
 					esc_html__( 'Font Awesome Elementor Addon', 'fontawesome-elementor-addon' ),
 					sprintf(
 						/* translators: %s: URL to the plugin settings page. */
-						esc_html__( 'Your Font Awesome kit is not configured. Please go to the %s to set it up.', 'fontawesome-elementor-addon' ),
-						'<a href="' . esc_url( admin_url( 'options-general.php?page=' . Settings_Page::PAGE_SLUG ) ) . '">' . esc_html__( 'settings page', 'fontawesome-elementor-addon' ) . '</a>'
+						esc_html__( 'You still need to add your Kit details to be able to use icons. Go to the %s to finish setting it up.', 'fontawesome-elementor-addon' ),
+						'<a href="' . esc_url( admin_url( 'options-general.php?page=' . Settings_Page::PAGE_SLUG ) ) . '">' . esc_html__( 'Addon Settings', 'fontawesome-elementor-addon' ) . '</a>'
 					)
 				);
 
