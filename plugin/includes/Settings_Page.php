@@ -188,7 +188,7 @@ class Settings_Page {
 		<?php if ( $is_configured && $has_kit_been_set_up ) : ?>
 			<?php echo $refresh_message; ?>
 		<?php else : ?>
-			<?= $initial_setup_message; ?>
+			<?php echo $initial_setup_message; ?>
 		<?php endif; ?>
 		</p>
 		<p>Once it's done, the Elementor Icon Library will reflect the changes.</p>
