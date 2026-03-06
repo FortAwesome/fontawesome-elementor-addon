@@ -626,11 +626,19 @@ EOT;
 
 		$is_configured = is_array( $opts ) && $opts['kit_token'] ?? false && $opts['api_token'] ?? false;
 
-		if ( ! $is_configured ) {
+		$is_plugin_settings_page = is_admin()
+			&& isset( $_GET['page'] )
+			&& Settings_Page::PAGE_SLUG === $_GET['page'];
+
+		if ( ! $is_configured && ! $is_plugin_settings_page ) {
 			add_filter( 'elementor/core/admin/notices', function ( array $notices ) {
 				$notice = new Notice(
-					'Foo',
-					'Bar'
+					esc_html__( 'Font Awesome Elementor Addon', 'fontawesome-elementor-addon' ),
+					sprintf(
+						/* translators: %s: URL to the plugin settings page. */
+						esc_html__( 'Your Font Awesome kit is not configured. Please go to the %s to set it up.', 'fontawesome-elementor-addon' ),
+						'<a href="' . esc_url( admin_url( 'options-general.php?page=' . Settings_Page::PAGE_SLUG ) ) . '">' . esc_html__( 'settings page', 'fontawesome-elementor-addon' ) . '</a>'
+					)
 				);
 
 				$notices[] = $notice;
