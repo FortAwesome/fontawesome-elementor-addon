@@ -63,7 +63,10 @@ final class Plugin {
 	 * @access public
 	 */
 	public function init(): void {
-		if ( ! Compatibility::is_compatible_for_editing() ) {
+		$compatibility = Compatibility::is_compatible_for_editing();
+
+		if ( is_wp_error( $compatibility ) ) {
+			self::emit_wp_error_as_admin_notice( $compatibility );
 			return;
 		}
 
@@ -626,9 +629,12 @@ EOT;
 
 		$is_configured = is_array( $opts ) && $opts['kit_token'] ?? false && $opts['api_token'] ?? false;
 
-		$is_plugin_settings_page = is_admin()
-			&& isset( $_GET['page'] )
-			&& Settings_Page::PAGE_SLUG === $_GET['page'];
+		$is_plugin_settings_page = false;
+
+		if ( is_admin() && isset( $_GET['page'] ) ) {
+			$page = sanitize_key( wp_unslash( $_GET['page'] ) );
+			$is_plugin_settings_page = ( Settings_Page::PAGE_SLUG === $page );
+		}
 
 		if ( ! $is_configured && ! $is_plugin_settings_page ) {
 			add_filter( 'elementor/core/admin/notices', function ( array $notices ) {
@@ -645,5 +651,27 @@ EOT;
 				return $notices;
 			} );
 		}
+	}
+
+	private static function emit_wp_error_as_admin_notice( $error ): void {
+		if ( ! is_wp_error( $error ) ) {
+			return;
+		}
+
+		if ( empty( $error->get_error_messages() ) ) {
+			return;
+		}
+
+		add_action( 'admin_notices', function () use ( $error ) {
+			?>
+			<div class="notice notice-error is-dismissible">
+			    <?php foreach ( $error->get_error_messages() as $message ) : ?>
+				<p>
+					<?php echo esc_html( $message ); ?>
+				</p>
+				<?php endforeach; ?>
+			</div>
+			<?php
+		} );
 	}
 }
