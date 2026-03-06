@@ -7,6 +7,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 }
 
 use FontAwesomeElementorAddon\Setup_Kit;
+use FontAwesomeLib\Crypto;
 
 class Settings_Page {
 	const PAGE_SLUG = 'fontawesome-elementor-addon-settings';
@@ -43,6 +44,7 @@ class Settings_Page {
 	public function init() {
 		add_action( 'admin_menu', fn () => $this->add_menu() );
 		add_action( 'admin_init', fn () => $this->register_settings() );
+		add_filter('pre_update_option_' . Options::option_name(), fn ($new_value, $old_value) => $this->pre_update_encrypt_api_token($new_value, $old_value), 10, 2);
 	}
 
 	private function add_menu() {
@@ -91,6 +93,34 @@ class Settings_Page {
 			self::PAGE_SLUG,
 			$general_section_name
 		);
+	}
+
+	public function pre_update_encrypt_api_token($new_value, $old_value) {
+		if (
+			array_key_exists( 'api_token', $new_value ) &&
+			is_string( $new_value['api_token'] ) &&
+			'' !== $new_value['api_token'] &&
+			( ! $old_value || (
+			array_key_exists( 'api_token', $old_value ) &&
+			$new_value['api_token'] !== $old_value['api_token'] ) ) &&
+			defined( 'LOGGED_IN_SALT' ) &&
+			is_string( LOGGED_IN_SALT ) &&
+			defined( 'LOGGED_IN_KEY' ) &&
+			is_string( LOGGED_IN_KEY ) ) {
+				$crypto = new Crypto( [
+					'key' => LOGGED_IN_KEY,
+					'salt' => LOGGED_IN_SALT,
+				] );
+				$encrypted = $crypto->encrypt( $new_value['api_token'] );
+				if ( ! \is_wp_error( $encrypted ) ) {
+						$new_value['api_token'] = $encrypted;
+				}
+		} else {
+			// If api_token is not in the new value, it means the user didn't change it. We should keep the old encrypted value.
+			$new_value['api_token'] = $old_value['api_token'] ?? Options::INITIAL_API_TOKEN_VALUE;
+		}
+
+		return $new_value;
 	}
 
 	private function render_page() {
@@ -185,16 +215,24 @@ class Settings_Page {
 	private function render_api_token_field() {
 		$decrypted_api_token = Options::get_decrypted_api_token();
 		$name = Options::option_name() . '[api_token]';
-		$api_token = is_wp_error( $decrypted_api_token ) ? '' : $decrypted_api_token;
+		$has_existing_api_token = !\is_wp_error( $decrypted_api_token );
+		$placeholer_message = $has_existing_api_token
+			? '✅ ' . esc_html__( 'API token saved', 'fontawesome-elementor-addon' )
+			: esc_html__( 'Paste an API token', 'fontawesome-elementor-addon' );
 		printf(
-			'<input type="password" class="regular-text" name="%s" value="%s" autocomplete="off" />',
+			'<input type="password" class="regular-text" name="%s" placeholder="%s" autocomplete="off" />',
 			esc_attr( $name ),
-			esc_attr( $api_token )
+			$placeholer_message
 		);
+		if ( $has_existing_api_token ) {
+			printf(
+				'<p class="description">%s</p>',
+				esc_html__( 'Paste a new API token to update it.', 'fontawesome-elementor-addon' )
+			);
+		}
 		printf(
-			'<p class="description">%s</p><p class="description">%s: Download Kits</p>',
-			esc_html__( 'Paste your Font Awesome API token here.', 'fontawesome-elementor-addon' ),
-			esc_html__( 'Make sure it has the required scope', 'fontawesome-elementor-addon' )
+			'<p class="description">%s: Download Kits</p>',
+			esc_html__( 'Make sure your API token has required scope', 'fontawesome-elementor-addon' )
 		);
 	}
 }
