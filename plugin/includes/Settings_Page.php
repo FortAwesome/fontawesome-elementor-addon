@@ -251,9 +251,12 @@ class Settings_Page {
 				esc_html__( 'Paste a new API token to update it.', 'fontawesome-elementor-addon' )
 			);
 		}
+
 		printf(
-			'<p class="description">%s: Download Kits</p>',
-			esc_html__( 'Make sure your API token has required scope', 'fontawesome-elementor-addon' )
+			'<p class="description">%1$s <a href="https://fontawesome.com/account/tokens" target="_blank" rel="noopener noreferrer">%2$s</a> %3$s: Download Kits</p>',
+			esc_html__( 'Make sure your', 'fontawesome-elementor-addon' ),
+			esc_html__( 'API token', 'fontawesome-elementor-addon' ),
+			esc_html__( 'has required scope', 'fontawesome-elementor-addon' )
 		);
 	}
 }
