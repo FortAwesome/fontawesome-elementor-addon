@@ -72,10 +72,10 @@ class Compatibility {
 			$error->merge_from( $result );
 		}
 
-		if ( empty( $error->get_error_messages() ) ) {
-			return true;
-		} else {
+		if ( count( $error->get_error_messages() ) > 1 ) {
 			return $error;
+		} else {
+			return true;
 		}
 	}
 
@@ -85,7 +85,14 @@ class Compatibility {
 	 * @return bool|WP_Error True if compatible, WP_Error with details if not.
 	 */
 	public static function is_compatible_for_editing(): bool|WP_Error {
-		$error = new WP_Error();
+		$error = new WP_Error(
+			'fontawesome_elementor_addon_compatibility_editing_error',
+			sprintf(
+				/* translators: 1: Plugin name */
+				__( '%1$s may not function properly in the Elementor editor due to compatibility issues with your WordPress hosting environment. Please review the compatibility requirements and ensure your environment meets them for the best experience.', 'fontawesome-elementor-addon' ),
+				esc_html__( 'Font Awesome Elementor Addon', 'fontawesome-elementor-addon' )
+			)
+		);
 
 		$result = self::check_compatibility_php();
 
@@ -99,14 +106,14 @@ class Compatibility {
 			$error->merge_from( $result );
 		}
 
-		if ( is_wp_error( $error ) && ! empty( $error->get_error_messages() ) ) {
+		if ( is_wp_error( $error ) && count( $error->get_error_messages() ) > 1 ) {
 			return $error;
 		}
 
 		return true;
 	}
 
-	private static function check_compatibility_api_service(): bool {
+	private static function check_compatibility_api_service(): bool|WP_Error {
 		$query_resolver = new Query_Resolver();
 		$auth_token_provider = new Auth_Token_Provider( 'FAKE_API_TOKEN' );
 		$query = <<<'EOT'
