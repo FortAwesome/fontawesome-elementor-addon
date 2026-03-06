@@ -72,12 +72,12 @@ class Compatibility {
 		$query_resolver = new Query_Resolver();
 		$auth_token_provider = new Auth_Token_Provider( 'FAKE_API_TOKEN' );
 		$query = <<<'EOT'
-        query {
-          release(version: "7.x") {
-            version
-          }
-        }
-        EOT;
+			query {
+				release(version: "7.x") {
+					version
+				}
+			}
+			EOT;
 
 		$response = $query_resolver->query( [ 'query' => $query ], $auth_token_provider, [ 'ignore_auth' => true ] );
 
@@ -132,7 +132,9 @@ class Compatibility {
 
 		try {
 			$wp_filesystem->delete( $temp_dir, true );
+			// phpcs:ignore Generic.CodeAnalysis.EmptyStatement.DetectedCatch
 		} catch ( \Exception $e ) {
+			// Intentionally ignoring delete errors for temp-dir cleanup: failure here should not block compatibility checks.
 		}
 
 		return true;
@@ -147,7 +149,9 @@ class Compatibility {
 	 * @access public
 	 */
 	public static function admin_notice_minimum_php_version(): void {
-
+		// Nonce verification is not applicable here. This notice only alters the current request's query var to prevent
+		// an "activated" banner and does not persist user input or perform privileged actions.
+		// phpcs:ignore WordPress.Security.NonceVerification.Recommended
 		if ( isset( $_GET['activate'] ) ) {
 			unset( $_GET['activate'] );
 		}
@@ -172,14 +176,17 @@ class Compatibility {
 	 * @access public
 	 */
 	public static function admin_notice_wp_filesystem_requirement(): void {
+		// Nonce verification is not applicable here. This notice only alters the current request's query var to prevent
+		// an "activated" banner and does not persist user input or perform privileged actions.
+		// phpcs:ignore WordPress.Security.NonceVerification.Recommended
 		if ( isset( $_GET['activate'] ) ) {
 			unset( $_GET['activate'] );
 		}
 
-		$message = sprintf(
+		printf(
 			/* translators: 1: Plugin name */
-			esc_html__( '"%1$s" requires that your WordPress site is configured to allow reading and writing files using WP_Filesystem.', 'fontawesome-elementor-addon' ),
-			'<strong>' . esc_html__( 'Font Awesome Elementor Addon', 'fontawesome-elementor-addon' ) . '</strong>'
+			'<div class="notice notice-warning is-dismissible"><p><strong>"%1$s"</strong> requires that your WordPress site is configured to allow reading and writing files using WP_Filesystem.</p></div>',
+			esc_html__( 'Font Awesome Elementor Addon', 'fontawesome-elementor-addon' )
 		);
 
 		printf( '<div class="notice notice-warning is-dismissible"><p>%1$s</p></div>', $message );
@@ -194,6 +201,9 @@ class Compatibility {
 	 * @access public
 	 */
 	public static function admin_notice_wp_upload_dir_requirement(): void {
+		// Nonce verification is not applicable here. This notice only alters the current request's query var to prevent
+		// an "activated" banner and does not persist user input or perform privileged actions.
+		// phpcs:ignore WordPress.Security.NonceVerification.Recommended
 		if ( isset( $_GET['activate'] ) ) {
 			unset( $_GET['activate'] );
 		}
@@ -216,6 +226,9 @@ class Compatibility {
 	 * @access public
 	 */
 	public static function admin_notice_temp_dir_requirement(): void {
+		// Nonce verification is not applicable here. This notice only alters the current request's query var to prevent
+		// an "activated" banner and does not persist user input or perform privileged actions.
+		// phpcs:ignore WordPress.Security.NonceVerification.Recommended
 		if ( isset( $_GET['activate'] ) ) {
 			unset( $_GET['activate'] );
 		}
@@ -238,6 +251,9 @@ class Compatibility {
 	 * @access public
 	 */
 	public static function admin_notice_api_service_requirement(): void {
+		// Nonce verification is not applicable here. This notice only alters the current request's query var to prevent
+		// an "activated" banner and does not persist user input or perform privileged actions.
+		// phpcs:ignore WordPress.Security.NonceVerification.Recommended
 		if ( isset( $_GET['activate'] ) ) {
 			unset( $_GET['activate'] );
 		}
