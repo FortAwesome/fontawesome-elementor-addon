@@ -10,8 +10,8 @@ use FontAwesomeLib\Query_Resolver;
 use FontAwesomeLib\Auth_Token_Provider;
 use FontAwesomeLib\Kit_Download;
 use FontAwesomeElementorAddon\Options;
-use \WP_Error;
-use \WP_Filesystem;
+use WP_Error;
+use WP_Filesystem;
 
 class Setup_Kit {
 	/**
@@ -20,7 +20,7 @@ class Setup_Kit {
 	 *
 	 * @return bool|WP_Error True if a kit has been set up, WP_Error if there was an error checking the kit setup status.
 	 */
-	public static function has_kit_been_set_up(): bool | WP_Error {
+	public static function has_kit_been_set_up(): bool|WP_Error {
 		$option = \get_option( Options::option_name(), [] );
 		$kit_assets_relative_dir = $option['kit_assets_relative_dir'] ?? null;
 		$kit_token = $option['kit_token'] ?? null;
@@ -34,7 +34,7 @@ class Setup_Kit {
 
 		$upload_base_dir = self::get_upload_base_dir();
 
-		if ( \is_wp_error( $upload_base_dir) ) {
+		if ( \is_wp_error( $upload_base_dir ) ) {
 			return $upload_base_dir;
 		}
 
@@ -54,7 +54,7 @@ class Setup_Kit {
 
 		global $wp_filesystem;
 
-		$kit_json_path = trailingslashit( $upload_base_dir ) . trailingslashit( $kit_assets_relative_dir ) . "metadata/kit.json";
+		$kit_json_path = trailingslashit( $upload_base_dir ) . trailingslashit( $kit_assets_relative_dir ) . 'metadata/kit.json';
 
 		$kit_json = $wp_filesystem->get_contents( $kit_json_path );
 
@@ -172,7 +172,7 @@ class Setup_Kit {
 		$upload_base_dir = self::get_upload_base_dir();
 
 		if ( is_wp_error( $upload_base_dir ) ) {
-			wp_send_json_error( $upload_base_dir, 500);
+			wp_send_json_error( $upload_base_dir, 500 );
 			return;
 		}
 
@@ -256,12 +256,15 @@ class Setup_Kit {
 			}
 		}
 
-		wp_send_json_success( [ 'done' => true, 'last_kit_refresh_at_formatted' => $last_kit_refresh_at_formatted ] );
+		wp_send_json_success( [
+			'done' => true,
+			'last_kit_refresh_at_formatted' => $last_kit_refresh_at_formatted,
+		] );
 
 		return;
 	}
 
-	private static function get_upload_base_dir(): string | WP_Error {
+	private static function get_upload_base_dir(): string|WP_Error {
 		$upload_dir = \wp_upload_dir( null, false, false );
 
 		if ( isset( $upload_dir['error'] ) && false !== $upload_dir['error'] ) {

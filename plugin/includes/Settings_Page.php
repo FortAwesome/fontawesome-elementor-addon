@@ -44,7 +44,7 @@ class Settings_Page {
 	public function init() {
 		add_action( 'admin_menu', fn () => $this->add_menu() );
 		add_action( 'admin_init', fn () => $this->register_settings() );
-		add_filter('pre_update_option_' . Options::option_name(), fn ($new_value, $old_value) => $this->pre_update_encrypt_api_token($new_value, $old_value), 10, 2);
+		add_filter( 'pre_update_option_' . Options::option_name(), fn ( $new_value, $old_value ) => $this->pre_update_encrypt_api_token( $new_value, $old_value ), 10, 2 );
 	}
 
 	private function add_menu() {
@@ -95,7 +95,7 @@ class Settings_Page {
 		);
 	}
 
-	public function pre_update_encrypt_api_token($new_value, $old_value) {
+	public function pre_update_encrypt_api_token( $new_value, $old_value ) {
 		if (
 			array_key_exists( 'api_token', $new_value ) &&
 			is_string( $new_value['api_token'] ) &&
@@ -112,9 +112,9 @@ class Settings_Page {
 					'salt' => LOGGED_IN_SALT,
 				] );
 				$encrypted = $crypto->encrypt( $new_value['api_token'] );
-				if ( ! \is_wp_error( $encrypted ) ) {
-						$new_value['api_token'] = $encrypted;
-				}
+			if ( ! \is_wp_error( $encrypted ) ) {
+					$new_value['api_token'] = $encrypted;
+			}
 		} else {
 			// If api_token is not in the new value, it means the user didn't change it. We should keep the old encrypted value.
 			$new_value['api_token'] = $old_value['api_token'] ?? Options::INITIAL_API_TOKEN_VALUE;
@@ -146,19 +146,19 @@ class Settings_Page {
 		$has_kit_been_set_up = \is_wp_error( $has_kit_been_set_up_result ) ? false : $has_kit_been_set_up_result;
 
 		$this->render_kit_setup_section( [
-			"is_configured" => $is_configured,
-			"has_kit_been_set_up" => $has_kit_been_set_up,
-			"last_kit_refresh_at" => $last_kit_refresh_at,
+			'is_configured' => $is_configured,
+			'has_kit_been_set_up' => $has_kit_been_set_up,
+			'last_kit_refresh_at' => $last_kit_refresh_at,
 		] );
 
 		echo '</div>';
 	}
 
 	private function render_kit_setup_section( $params = [] ) {
-		$is_configured = is_array( $params ) ?  boolval ( $params["is_configured"] ?? false ) : false;
-		$is_form_changed = is_array( $params ) ?  boolval ( $params["is_form_changed"] ?? false ) : false;
-		$has_kit_been_set_up = is_array( $params ) ?  boolval ( $params["has_kit_been_set_up"] ?? false ) : false;
-		$last_kit_refresh_at = is_array( $params ) ?  ( $params["last_kit_refresh_at"] ?? null ) : null;
+		$is_configured = is_array( $params ) ? boolval( $params['is_configured'] ?? false ) : false;
+		$is_form_changed = is_array( $params ) ? boolval( $params['is_form_changed'] ?? false ) : false;
+		$has_kit_been_set_up = is_array( $params ) ? boolval( $params['has_kit_been_set_up'] ?? false ) : false;
+		$last_kit_refresh_at = is_array( $params ) ? ( $params['last_kit_refresh_at'] ?? null ) : null;
 		$last_kit_refresh_at_formatted = is_int( $last_kit_refresh_at ) ? Options::format_unix_timestamp( $last_kit_refresh_at ) : null;
 
 		$button_label = ( $is_configured && $has_kit_been_set_up )
@@ -166,21 +166,21 @@ class Settings_Page {
 			: esc_html__( 'Setup Kit', 'fontawesome-elementor-addon' );
 		$button_disabled_attr = ! $is_configured ? 'disabled' : '';
 		?>
-	<h2><?= esc_html__('Kit Setup', 'fontawesome-elementor-addon') ?></h2>
+	<h2><?php echo esc_html__( 'Kit Setup', 'fontawesome-elementor-addon' ); ?></h2>
 	<div class="fontawesome-elementor-addon-kit-setup">
-	    <div>
+		<div>
 		<p>After saving any changes, click "Setup Kit" to automatically download and install the kit for self-hosting on your WordPress server.</p>
 		<p>When it's done, you can expect to see the changes reflected in the Elementor Icon Library.</p>
 		<button
-		    type="button"
+			type="button"
 			class="button button-secondary"
 			id="fontawesome-elementor-addon-kit-setup-start"
-			<?= esc_html__( $button_disabled_attr, 'fontawesome-elementor-addon' ) ?>
+			<?php echo esc_html__( $button_disabled_attr, 'fontawesome-elementor-addon' ); ?>
 		>
 		<?php if ( $is_configured && $has_kit_been_set_up ) : ?>
-			<?= esc_html__( 'Refresh Setup', 'fontawesome-elementor-addon' ) ?>
+			<?php echo esc_html__( 'Refresh Setup', 'fontawesome-elementor-addon' ); ?>
 		<?php else : ?>
-			<?= esc_html__( 'Setup Kit', 'fontawesome-elementor-addon' ) ?>
+			<?php echo esc_html__( 'Setup Kit', 'fontawesome-elementor-addon' ); ?>
 		<?php endif; ?>
 		</button>
 
@@ -190,7 +190,7 @@ class Settings_Page {
 		</div>
 		<div>
 			Last refreshed at: <span id="fontawesome-elementor-addon-last-kit-refresh-at">
-				<?= $last_kit_refresh_at_formatted ? $last_kit_refresh_at_formatted : 'never' ?>
+				<?php echo $last_kit_refresh_at_formatted ? $last_kit_refresh_at_formatted : 'never'; ?>
 			</span>
 		</div>
 	</div>
@@ -215,7 +215,7 @@ class Settings_Page {
 	private function render_api_token_field() {
 		$decrypted_api_token = Options::get_decrypted_api_token();
 		$name = Options::option_name() . '[api_token]';
-		$has_existing_api_token = !\is_wp_error( $decrypted_api_token );
+		$has_existing_api_token = ! \is_wp_error( $decrypted_api_token );
 		$placeholer_message = $has_existing_api_token
 			? '✅ ' . esc_html__( 'API token saved', 'fontawesome-elementor-addon' )
 			: esc_html__( 'Paste an API token', 'fontawesome-elementor-addon' );

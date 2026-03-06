@@ -146,15 +146,15 @@ class Options {
 	 * @param int $unix_ts Unix timestamp.
 	 * @return string Formatted date/time string.
 	 */
-	public static function format_unix_timestamp(int $unix_ts): string {
-	    $date = (new \DateTimeImmutable())->setTimestamp($unix_ts);
+	public static function format_unix_timestamp( int $unix_ts ): string {
+		$date = ( new \DateTimeImmutable() )->setTimestamp( $unix_ts );
 
-	    // Convert to the site's configured timezone
-	    $local_date = $date->setTimezone(\wp_timezone());
+		// Convert to the site's configured timezone
+		$local_date = $date->setTimezone( \wp_timezone() );
 
-	    // Format using the site's date/time format settings
-	    $format = \get_option('date_format') . ' ' . \get_option('time_format');
+		// Format using the site's date/time format settings
+		$format = \get_option( 'date_format' ) . ' ' . \get_option( 'time_format' );
 
-	    return $local_date->format($format);
+		return $local_date->format( $format );
 	}
 }
