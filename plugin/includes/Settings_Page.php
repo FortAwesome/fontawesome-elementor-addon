@@ -186,9 +186,9 @@ class Settings_Page {
 		<div>
 		<p>
 		<?php if ( $is_configured && $has_kit_been_set_up ) : ?>
-			<?php echo $refresh_message; ?>
+			<?php echo esc_html( $refresh_message ); ?>
 		<?php else : ?>
-			<?php echo $initial_setup_message; ?>
+			<?php echo esc_html( $initial_setup_message ); ?>
 		<?php endif; ?>
 		</p>
 		<p>Once it's done, the Elementor Icon Library will reflect the changes.</p>
@@ -196,12 +196,12 @@ class Settings_Page {
 			type="button"
 			class="button button-secondary"
 			id="fontawesome-elementor-addon-kit-setup-start"
-			<?php echo esc_html__( $button_disabled_attr, 'fontawesome-elementor-addon' ); ?>
+			<?php echo !$is_configured ? 'disabled' : ''; ?>
 		>
 		<?php if ( $is_configured && $has_kit_been_set_up ) : ?>
-			<?php echo $refresh_button_label; ?>
+			<?php echo esc_html( $refresh_button_label ); ?>
 		<?php else : ?>
-			<?php echo $setup_button_label; ?>
+			<?php echo esc_html( $setup_button_label ); ?>
 		<?php endif; ?>
 		</button>
 
@@ -237,13 +237,13 @@ class Settings_Page {
 		$decrypted_api_token = Options::get_decrypted_api_token();
 		$name = Options::option_name() . '[api_token]';
 		$has_existing_api_token = ! \is_wp_error( $decrypted_api_token );
-		$placeholer_message = $has_existing_api_token
+		$placeholder_message = $has_existing_api_token
 			? '✅ ' . esc_html__( 'API token saved', 'fontawesome-elementor-addon' )
 			: esc_html__( 'Paste an API token', 'fontawesome-elementor-addon' );
 		printf(
 			'<input type="password" class="regular-text" name="%s" placeholder="%s" autocomplete="off" />',
 			esc_attr( $name ),
-			$placeholer_message
+			esc_attr( $placeholder_message )
 		);
 		if ( $has_existing_api_token ) {
 			printf(
