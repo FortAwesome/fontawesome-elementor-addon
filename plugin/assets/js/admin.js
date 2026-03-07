@@ -10,6 +10,22 @@
     );
   }
 
+  function displayErrors(errors) {
+    if (!Array.isArray(errors)) {
+      return;
+    }
+
+    for (const error of errors) {
+      $("#fontawesome-elementor-errors-subsection").append(
+        $("<p>").text(error.message),
+      );
+    }
+
+    if (errors.length > 0) {
+      $("#fontawesome-elementor-errors-subsection").show();
+    }
+  }
+
   function poll(buildId) {
     const delayMs = 1000;
 
@@ -64,11 +80,14 @@
           // Not done yet: wait, then poll again
           pollTimer = setTimeout(doPoll, delayMs);
         })
-        .fail(function () {
+        .fail(function (resp) {
           $("#fontawesome-elementor-addon-kit-setup-spinner").hide();
+          $("#fontawesome-elementor-errors-subsection").show();
           $("#fontawesome-elementor-addon-kit-setup-status").text(
             FAILED_MESSAGE,
           );
+          const errors = resp?.responseJSON?.data || [];
+          displayErrors(errors);
           setBusy(false);
           pollTimer = null;
         });
@@ -106,11 +125,13 @@
           $("#fontawesome-elementor-addon-kit-setup-status").text("Running…");
           poll(buildId);
         })
-        .fail(function () {
+        .fail(function (resp) {
           $("#fontawesome-elementor-addon-kit-setup-spinner").hide();
           $("#fontawesome-elementor-addon-kit-setup-status").text(
             FAILED_MESSAGE,
           );
+          const errors = resp?.responseJSON?.data || [];
+          displayErrors(errors);
           setBusy(false);
         });
     });

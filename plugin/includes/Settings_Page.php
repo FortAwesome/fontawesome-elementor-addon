@@ -230,6 +230,9 @@ class Settings_Page {
 				<?php echo esc_html( $last_kit_refresh_at_formatted ? $last_kit_refresh_at_formatted : 'never' ); ?>
 			</span>
 		</div>
+		<div id="fontawesome-elementor-errors-subsection" style="display: none;">
+		<h2>Errors</h2>
+		</div>
 	</div>
 		<?php
 	}
