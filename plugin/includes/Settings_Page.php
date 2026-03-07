@@ -78,11 +78,22 @@ class Settings_Page {
 				<h2>Add Your Kit Details</h2>
 				<p>
 				<?php
-				printf(
+				$message = sprintf(
 					/* translators: 1: account tokes URL, 2: kits URL */
-					esc_html__( 'Visit your <a href="%1$s" target="_blank" rel="noopener noreferrer">Account on fontawesome.com</a> to get your API token, and <a href="%2$s" target="_blank" rel="noopener noreferrer">your Kits</a> to get the token for the Kit you want to use and enter them below.', 'fontawesome-elementor-addon' ),
+					__( 'Visit your <a href="%1$s" target="_blank" rel="noopener noreferrer">Account on fontawesome.com</a> to get your API token, and <a href="%2$s" target="_blank" rel="noopener noreferrer">your Kits</a> to get the token for the Kit you want to use and enter them below.', 'fontawesome-elementor-addon' ),
 					esc_attr( 'https://fontawesome.com/account/tokens' ),
 					esc_attr( 'https://fontawesome.com/kits' )
+				);
+
+				echo wp_kses(
+					$message,
+					[
+						'a' => [
+							'href'   => true,
+							'target' => true,
+							'rel'    => true,
+						],
+					]
 				);
 				?>
 				</p>
