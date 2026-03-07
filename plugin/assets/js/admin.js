@@ -78,6 +78,7 @@
         })
         .fail(function (resp) {
           $("#fontawesome-elementor-addon-kit-setup-spinner").hide();
+          $("#fontawesome-elementor-addon-kit-setup-status-progress").hide();
           $("#fontawesome-elementor-addon-kit-setup-status-fail").show();
           const errors = resp?.responseJSON?.data || [];
           displayErrors(errors);
@@ -112,6 +113,7 @@
       })
         .done(function (resp) {
           if (!resp || !resp.success) {
+            $("#fontawesome-elementor-addon-kit-setup-status-progress").hide();
             $("#fontawesome-elementor-addon-kit-setup-status-fail").show();
             setBusy(false);
             return;
@@ -124,6 +126,7 @@
         })
         .fail(function (resp) {
           $("#fontawesome-elementor-addon-kit-setup-spinner").hide();
+          $("#fontawesome-elementor-addon-kit-setup-status-progress").hide();
           $("#fontawesome-elementor-addon-kit-setup-status-fail").show();
           const errors = resp?.responseJSON?.data || [];
           displayErrors(errors);
