@@ -4,16 +4,21 @@ set -e
 
 DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )"
 PLUGIN_DIR="$(realpath "$DIR/../plugin")"
-DIST_DIR="$PLUGIN_DIR/wp-dist"
+WP_DIST_DIR="$PLUGIN_DIR/wp-dist"
+ZIP_DIST_DIR="$PLUGIN_DIR/zip-dist"
 
-rm -fR $DIST_DIR
-mkdir $DIST_DIR
+rm -fR $WP_DIST_DIR
+rm -fR $ZIP_DIST_DIR
+mkdir $WP_DIST_DIR
+mkdir $ZIP_DIST_DIR
 wp-env run cli --env-cwd wp-content/plugins/fontawesome-elementor-addon composer install -- --no-dev --optimize-autoloader
 
 for dir in "assets" "includes" "vendor"; do
-  cp -r $PLUGIN_DIR/$dir $DIST_DIR/$dir
+  cp -r $PLUGIN_DIR/$dir $WP_DIST_DIR/$dir
 done
 
 for file in $PLUGIN_DIR/*.php $PLUGIN_DIR/readme.txt; do
-  cp $file $DIST_DIR
+  cp $file $WP_DIST_DIR
 done
+
+( cd "$WP_DIST_DIR" && zip -r "$ZIP_DIST_DIR/fontawesome-elementor-addon.zip" . )
