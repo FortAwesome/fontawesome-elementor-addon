@@ -186,10 +186,7 @@ class Settings_Page {
 		$last_kit_refresh_at = is_array( $params ) ? ( $params['last_kit_refresh_at'] ?? null ) : null;
 		$last_kit_refresh_at_formatted = is_int( $last_kit_refresh_at ) ? Options::format_unix_timestamp( $last_kit_refresh_at ) : null;
 
-		$button_label = ( $is_configured && $has_kit_been_set_up )
-			? esc_html__( 'Refresh Setup', 'fontawesome-elementor-addon' )
-			: esc_html__( 'Setup Kit', 'fontawesome-elementor-addon' );
-		$refresh_button_label = esc_html__( 'Refresh Setup', 'fontawesome-elementor-addon' );
+		$refresh_button_label = esc_html__( 'Refresh Kit', 'fontawesome-elementor-addon' );
 		$setup_button_label = esc_html__( 'Setup Kit', 'fontawesome-elementor-addon' );
 
 		$initial_setup_message = sprintf(
