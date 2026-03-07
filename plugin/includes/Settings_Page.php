@@ -191,17 +191,15 @@ class Settings_Page {
 
 		$initial_setup_message = sprintf(
 			/* translators: 1: button label */
-			__( 'After saving your API and Kit Token above, click "%1$s" to automatically download and install the Kit for self-hosting on your WordPress server.', 'fontawesome-elementor-addon' ),
+			__( 'After saving your API and Kit Token above, click "%1$s" to automatically download and install the Kit for self-hosting on your WordPress server. Once the Kit is set up, you can use the Elementor Icon Library to add Font Awesome icons.', 'fontawesome-elementor-addon' ),
 			$setup_button_label
 		);
 
 		$refresh_message = sprintf(
 			/* translators: 1: button label */
-			__( 'After changing the Kit Token above or modifying your Kit, click "%1$s" to update the Kit\'s self-hosting on your WordPress server.', 'fontawesome-elementor-addon' ),
+			__( 'If you edit your Kit or the change the Kit Token above, click "%1$s" to update the Kit being self-hosted on your WordPress server. Once the Kit is refreshed, you can use the Elementor Icon Library to add the Font Awesome icons in your updated Kit.', 'fontawesome-elementor-addon' ),
 			$refresh_button_label
 		);
-
-		$concluding_message = __( "Once it's done, the Elementor Icon Library will reflect the changes.", 'fontawesome-elementor-addon' );
 		?>
 	<h2><?php echo esc_html__( 'Kit Setup', 'fontawesome-elementor-addon' ); ?></h2>
 	<div class="fontawesome-elementor-addon-kit-setup">
@@ -213,8 +211,6 @@ class Settings_Page {
 		} else {
 			echo esc_html( $initial_setup_message );
 		}
-
-			echo ' ' . esc_html( $concluding_message );
 		?>
 		</p>
 		<button
