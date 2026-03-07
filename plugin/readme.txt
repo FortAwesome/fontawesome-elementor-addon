@@ -1,7 +1,7 @@
 === Font Awesome Elementor Addon ===
 Contributors: fontawesome, mlwilkerson, frrrances
 Stable tag: 0.1.0-alpha1
-Tags: FontAwesome, Elementor, icon, svg icon, iconfont
+Tags: FontAwesome, Elementor, icon, svg icon
 Requires at least: 5.8
 Tested up to: 6.9
 Requires PHP: 7.4
