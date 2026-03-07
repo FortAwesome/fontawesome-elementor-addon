@@ -14,6 +14,6 @@ for dir in "assets" "includes" "vendor"; do
   cp -r $PLUGIN_DIR/$dir $DIST_DIR/$dir
 done
 
-for file in $PLUGIN_DIR/*.php; do
+for file in $PLUGIN_DIR/*.php $PLUGIN_DIR/readme.txt; do
   cp $file $DIST_DIR
 done
