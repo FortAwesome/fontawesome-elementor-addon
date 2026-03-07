@@ -1,6 +1,5 @@
 (function ($) {
   let pollTimer = null;
-  const FAILED_MESSAGE = "💣 Failed";
 
   function setBusy(isBusy) {
     $("#fontawesome-elementor-addon-kit-setup-start").prop("disabled", isBusy);
@@ -43,7 +42,7 @@
       })
         .done(function (resp) {
           if (!resp || !resp.success) {
-            $("#fontawesome-elementor-addon-kit-setup-status").text(
+            $("#fontawesome-elementor-addon-kit-setup-status-progress").text(
               "Error checking status.",
             );
             setBusy(false);
@@ -52,18 +51,15 @@
           }
 
           const data = resp.data;
-          $("#fontawesome-elementor-addon-kit-setup-status").text(
+          $("#fontawesome-elementor-addon-kit-setup-status-progress").text(
             data.message || data.status,
           );
 
           if (data.done) {
             setBusy(false);
             $("#fontawesome-elementor-addon-kit-setup-spinner").hide();
-            $("#fontawesome-elementor-addon-kit-setup-status").text("✓");
-            $("#fontawesome-elementor-addon-kit-setup-status").css(
-              "color",
-              "green",
-            );
+            $("#fontawesome-elementor-addon-kit-setup-status-progress").hide();
+            $("#fontawesome-elementor-addon-kit-setup-status-success").show();
             const lastKitRefreshAtFormatted =
               data?.last_kit_refresh_at_formatted;
 
@@ -82,10 +78,7 @@
         })
         .fail(function (resp) {
           $("#fontawesome-elementor-addon-kit-setup-spinner").hide();
-          $("#fontawesome-elementor-errors-subsection").show();
-          $("#fontawesome-elementor-addon-kit-setup-status").text(
-            FAILED_MESSAGE,
-          );
+          $("#fontawesome-elementor-addon-kit-setup-status-fail").show();
           const errors = resp?.responseJSON?.data || [];
           displayErrors(errors);
           setBusy(false);
@@ -105,9 +98,13 @@
       }
 
       setBusy(true);
-      $("#fontawesome-elementor-addon-kit-setup-status").css("color", "unset");
+      $("#fontawesome-elementor-addon-kit-setup-status-fail").hide();
+      $("#fontawesome-elementor-addon-kit-setup-status-success").hide();
+      $("#fontawesome-elementor-addon-kit-setup-status-progress").text(
+        "Starting…",
+      );
+      $("#fontawesome-elementor-addon-kit-setup-status-progress").show();
       $("#fontawesome-elementor-addon-kit-setup-spinner").show();
-      $("#fontawesome-elementor-addon-kit-setup-status").text("Starting…");
 
       $.post(FontawesomeElementorAddonAdmin.ajaxurl, {
         action: "fontawesome_elementor_addon_kit_setup_start",
@@ -115,21 +112,19 @@
       })
         .done(function (resp) {
           if (!resp || !resp.success) {
-            $("#fontawesome-elementor-addon-kit-setup-status").text(
-              FAILED_MESSAGE,
-            );
+            $("#fontawesome-elementor-addon-kit-setup-status-fail").show();
             setBusy(false);
             return;
           }
           const buildId = resp.data.build_id;
-          $("#fontawesome-elementor-addon-kit-setup-status").text("Running…");
+          $("#fontawesome-elementor-addon-kit-setup-status-progress").text(
+            "Running…",
+          );
           poll(buildId);
         })
         .fail(function (resp) {
           $("#fontawesome-elementor-addon-kit-setup-spinner").hide();
-          $("#fontawesome-elementor-addon-kit-setup-status").text(
-            FAILED_MESSAGE,
-          );
+          $("#fontawesome-elementor-addon-kit-setup-status-fail").show();
           const errors = resp?.responseJSON?.data || [];
           displayErrors(errors);
           setBusy(false);
