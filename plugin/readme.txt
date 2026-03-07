@@ -64,6 +64,26 @@ In the Font Awesome Elementor Addon settings page, enter your API Token and Kit 
 
 If you make changes to your Kit in your Font Awesome account, such as adding or removing icons, return to the settings page and click "Refresh Kit" to automatically update the Kit's self-hosting on your WordPress. This changes will be reflected immediately in the Elementor Icon Library.
 
+= Kit Requirements =
+
+Due to some technical requirements of how Elementor works, your Font Awesome Pro Kit must include only a limited number of icons. An icon count of 500 is known to work as expected.
+
+This requires using a subsetted kit.
+
+It could be a custom-subsetted kit, where you select each individual icon to be included.
+
+Or it could be an auto-subsetted kit, where you include a whole style. However, the only styles currently that contain fewer than 500 icons are the Pro Plus styles, like Notdog Solid or Chisel Regular.
+
+= Recommend Including the Default Icon =
+
+Elementor uses the "star" in the Classic Solid style as the default icon in the icon preview before you select one in the Icon Library. If you want that default icon preview to work as expected, you must include the "star" icon in the Classic Solid style in your Kit, which must be a custom-subsetted kit.
+
+This is only a cosmetic issue, and doesn't affect the actual icons you can select and use in Elementor. If you don't include the "star" icon in the Classic Solid style, then the default icon preview will just be blank or show an empty box.
+
+= Account Requirement =
+
+This plugin requires an active Font Awesome Pro account that includes the Kit Download feature. (Font Awesome Pro Lite plans do not include Kit Download.)
+
 == Changelog ==
 = 0.1.0-alpha1 =
 
