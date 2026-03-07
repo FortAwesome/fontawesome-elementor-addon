@@ -50,7 +50,7 @@ Once you activate the Font Awesome Elementor Addon plugin, you will see Font Awe
 
 To use the plugin, you will need to have a Font Awesome Pro Kit. If you don't have one, you can get one from https://fontawesome.com.
 
-In your Font Awesome account, create an [API Token](https://fontawesome.com/account#api-tokens) with scope "Download Kits".
+In your Font Awesome account, create an [API Token](https://fontawesome.com/account/tokens) with scope "Download Kits".
 
 Create or visit one of your existing [Font Awesome Pro Kits](https://fontawesome.com/kits). On the Kit's "Set Up" tab, find the Kit embed code, that looks like this:
 
