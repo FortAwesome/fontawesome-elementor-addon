@@ -15,6 +15,12 @@ class Options {
 	private const BACKEND_ONLY_SETTINGS_TEXT = [ 'kit_assets_relative_dir', 'option_schema_version' ];
 
 	/**
+	 * The initial value for the API token, which is an empty string.
+	 * This is used when initializing options with defaults.
+	 */
+	public const INITIAL_API_TOKEN_VALUE = '';
+
+	/**
 	 * Return the option_name of this plugin's option record in the `wp_options` table in the database.
 	 *
 	 * @return string the option name
@@ -78,7 +84,9 @@ class Options {
 	public static function get_options_with_defaults(): array {
 		$defaults = [
 			'kit_token' => '',
-			'api_token' => '',
+			'api_token' => self::INITIAL_API_TOKEN_VALUE,
+			'build_id' => '',
+			'last_kit_refresh_at' => null,
 			'load'  => 0,
 			'option_schema_version' => self::OPTION_SCHEMA_VERSION,
 		];
@@ -114,20 +122,15 @@ class Options {
 		}
 
 		if ( array_key_exists( 'api_token', $input ) ) {
-			if ( defined( 'LOGGED_IN_SALT' ) &&
-			is_string( LOGGED_IN_SALT ) &&
-			defined( 'LOGGED_IN_KEY' ) &&
-			is_string( LOGGED_IN_KEY ) ) {
-				$crypto = new Crypto( [
-					'key' => LOGGED_IN_KEY,
-					'salt' => LOGGED_IN_SALT,
-				] );
-				$sanitized = sanitize_text_field( wp_unslash( $input['api_token'] ) );
-				$encrypted = $crypto->encrypt( $sanitized );
-				if ( ! is_wp_error( $encrypted ) ) {
-						$output['api_token'] = $encrypted;
-				}
-			}
+			$output['api_token'] = sanitize_text_field( wp_unslash( $input['api_token'] ) );
+		}
+
+		if ( array_key_exists( 'build_id', $input ) ) {
+			$output['build_id'] = sanitize_text_field( wp_unslash( $input['build_id'] ) );
+		}
+
+		if ( array_key_exists( 'last_kit_refresh_at', $input ) && is_int( $input['last_kit_refresh_at'] ) ) {
+			$output['last_kit_refresh_at'] = $input['last_kit_refresh_at'];
 		}
 
 		if ( array_key_exists( 'load', $input ) ) {
@@ -135,5 +138,23 @@ class Options {
 		}
 
 			return $output;
+	}
+
+	/**
+	 * Format a unix timestamp into a human-readable date/time string, using the site's configured date and time formats and timezone.
+	 *
+	 * @param int $unix_ts Unix timestamp.
+	 * @return string Formatted date/time string.
+	 */
+	public static function format_unix_timestamp( int $unix_ts ): string {
+		$date = ( new \DateTimeImmutable() )->setTimestamp( $unix_ts );
+
+		// Convert to the site's configured timezone
+		$local_date = $date->setTimezone( \wp_timezone() );
+
+		// Format using the site's date/time format settings
+		$format = \get_option( 'date_format' ) . ' ' . \get_option( 'time_format' ) . ' T';
+
+		return $local_date->format( $format );
 	}
 }

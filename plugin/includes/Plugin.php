@@ -6,9 +6,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 	exit; // Exit if accessed directly.
 }
 
-use FontAwesomeLib\Query_Resolver;
-use FontAwesomeLib\Auth_Token_Provider;
-use FontAwesomeLib\Svg_icon;
+use FontAwesomeLib\Svg_Icon;
 use FontAwesomeLib\Family_Style;
 use FontAwesomeLib\Family_Style_Collection;
 use WP_Error;
@@ -63,7 +61,10 @@ final class Plugin {
 	 * @access public
 	 */
 	public function init(): void {
-		if ( ! Compatibility::is_compatible_for_editing() ) {
+		$compatibility = Compatibility::is_compatible_for_editing();
+
+		if ( is_wp_error( $compatibility ) ) {
+			self::emit_wp_error_as_admin_notice( $compatibility );
 			return;
 		}
 
@@ -75,6 +76,8 @@ final class Plugin {
 
 		add_filter( 'elementor/icons_manager/native', fn ( $settings ) => $this->replace_font_awesome_native( $settings ) );
 		add_filter( 'elementor/icons_manager/additional_tabs', fn () => $this->replace_font_awesome_additional_tabs() );
+
+		$this->maybe_show_setup_notice();
 
 		if ( is_admin() ) {
 			Settings_Page::instance()->init();
@@ -617,5 +620,60 @@ EOT;
 		}
 
 		return $elementor_plugin->experiments->is_feature_active( 'e_font_icon_svg' );
+	}
+
+	private function maybe_show_setup_notice() {
+		$opts = Options::get_options_with_defaults();
+
+		$is_configured = is_array( $opts ) && $opts['kit_token'] ?? false && $opts['api_token'] ?? false;
+
+		$is_plugin_settings_page = false;
+
+		// Ignore nonce verification here since we're only checking the presence of the 'page' query parameter
+		// to determine whether to show the notice, and this is not a state-changing action.
+		// phpcs:ignore WordPress.Security.NonceVerification.Recommended
+		if ( is_admin() && isset( $_GET['page'] ) ) {
+			// phpcs:ignore WordPress.Security.NonceVerification.Recommended
+			$page = sanitize_key( wp_unslash( $_GET['page'] ) );
+			$is_plugin_settings_page = ( Settings_Page::PAGE_SLUG === $page );
+		}
+
+		if ( ! $is_configured && ! $is_plugin_settings_page ) {
+			add_filter( 'elementor/core/admin/notices', function ( array $notices ) {
+				$notice = new Notice(
+					esc_html__( 'Font Awesome Elementor Addon', 'fontawesome-elementor-addon' ),
+					sprintf(
+						/* translators: %s: URL to the plugin settings page. */
+						esc_html__( 'You still need to add your Kit details to be able to use icons. Go to the %s to finish setting it up.', 'fontawesome-elementor-addon' ),
+						'<a href="' . esc_url( admin_url( 'options-general.php?page=' . Settings_Page::PAGE_SLUG ) ) . '">' . esc_html__( 'Addon Settings', 'fontawesome-elementor-addon' ) . '</a>'
+					)
+				);
+
+				$notices[] = $notice;
+				return $notices;
+			} );
+		}
+	}
+
+	private static function emit_wp_error_as_admin_notice( $error ): void {
+		if ( ! is_wp_error( $error ) ) {
+			return;
+		}
+
+		if ( empty( $error->get_error_messages() ) ) {
+			return;
+		}
+
+		add_action( 'admin_notices', function () use ( $error ) {
+			?>
+			<div class="notice notice-error is-dismissible">
+				<?php foreach ( $error->get_error_messages() as $message ) : ?>
+				<p>
+					<?php echo esc_html( $message ); ?>
+				</p>
+				<?php endforeach; ?>
+			</div>
+			<?php
+		} );
 	}
 }
