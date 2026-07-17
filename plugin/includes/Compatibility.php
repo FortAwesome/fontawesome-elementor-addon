@@ -61,18 +61,35 @@ class Compatibility {
 			$error->merge_from( $result );
 		}
 
-		$crypto = new Crypto( [
-			'key' => LOGGED_IN_KEY,
-			'salt' => LOGGED_IN_SALT,
-		] );
+		if ( defined( 'LOGGED_IN_KEY' ) && is_string( LOGGED_IN_KEY )
+			&& defined( 'LOGGED_IN_SALT' ) && is_string( LOGGED_IN_SALT ) ) {
+			$crypto = new Crypto( [
+				'key' => LOGGED_IN_KEY,
+				'salt' => LOGGED_IN_SALT,
+			] );
 
-		$result = $crypto->is_compatible();
+			$result = $crypto->is_compatible();
 
-		if ( is_wp_error( $result ) ) {
-			$error->merge_from( $result );
+			if ( is_wp_error( $result ) ) {
+				$error->merge_from( $result );
+			}
+		} else {
+			$error->merge_from( new WP_Error(
+				'fontawesome_elementor_addon_compatibility_crypto_setup_error',
+				sprintf(
+					/* translators: 1: Plugin name */
+					__( '%1$s requires the WordPress secret keys LOGGED_IN_KEY and LOGGED_IN_SALT to be defined so it can securely store your API token. One or both are missing from your site configuration.', 'fontawesome-elementor-addon' ),
+					esc_html__( 'Font Awesome Elementor Addon', 'fontawesome-elementor-addon' )
+				)
+			) );
 		}
 
-		if ( count( $error->get_error_messages() ) > 1 ) {
+		// $error starts as an empty WP_Error (see above), so it carries a message
+		// only when one of the checks above merged a failure into it. Any single
+		// failure therefore means the environment is incompatible — hence >= 1.
+		// (Contrast is_compatible_for_editing(), which seeds $error with a
+		// baseline message and so correctly uses > 1.)
+		if ( count( $error->get_error_messages() ) >= 1 ) {
 			return $error;
 		} else {
 			return true;
