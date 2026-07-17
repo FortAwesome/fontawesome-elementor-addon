@@ -283,9 +283,11 @@ class Setup_Kit {
 	 * Accepts a WP_Error, a plain string, or an array with a 'message' key, and
 	 * always emits `data` as a list of { code, message } objects so the client
 	 * can render every error consistently (previously, plain-array errors were
-	 * silently dropped by the front end because they were not a list). Each entry
-	 * is also written to the PHP error log so a diagnostic trace survives even
-	 * when the UI cannot show it.
+	 * silently dropped by the front end because they were not a list). Server
+	 * errors (HTTP >= 500) are also written to the PHP error log so a diagnostic
+	 * trace survives even when the UI cannot show it. Client errors (4xx such as
+	 * a 403 "Forbidden" or a 400 "Missing build_id") are expected, actionable by
+	 * the caller, and would only be log noise, so they are not logged.
 	 *
 	 * @param WP_Error|string|array $error  The error to report.
 	 * @param int                   $status HTTP status code.
@@ -293,13 +295,15 @@ class Setup_Kit {
 	private static function send_error( $error, int $status = 500 ): void {
 		$errors = self::normalize_errors( $error );
 
-		foreach ( $errors as $entry ) {
-			// phpcs:ignore WordPress.PHP.DevelopmentFunctions.error_log_error_log
-			error_log( sprintf(
-				'[fontawesome-elementor-addon] kit setup error (%s): %s',
-				$entry['code'],
-				$entry['message']
-			) );
+		if ( $status >= 500 ) {
+			foreach ( $errors as $entry ) {
+				// phpcs:ignore WordPress.PHP.DevelopmentFunctions.error_log_error_log
+				error_log( sprintf(
+					'[fontawesome-elementor-addon] kit setup error (%s): %s',
+					$entry['code'],
+					$entry['message']
+				) );
+			}
 		}
 
 		wp_send_json_error( $errors, $status );
@@ -330,7 +334,12 @@ class Setup_Kit {
 		}
 
 		if ( is_string( $error ) && '' !== $error ) {
-			return [ [ 'code' => 'error', 'message' => $error ] ];
+			return [
+				[
+					'code' => 'error',
+					'message' => $error,
+				],
+			];
 		}
 
 		if ( is_array( $error ) && isset( $error['message'] ) && is_string( $error['message'] ) ) {
@@ -359,6 +368,11 @@ class Setup_Kit {
 	 * trace and a user-visible message.
 	 *
 	 * @param \Throwable $e The uncaught throwable.
+	 *
+	 * @throws \Throwable Re-thrown when $e is one of WordPress's own die/exit
+	 *                    signals (WPDieException, WPAjaxDieStopException,
+	 *                    WPAjaxDieContinueException), so normal response
+	 *                    termination is not swallowed.
 	 */
 	private static function send_throwable( \Throwable $e ): void {
 		// Let WordPress's own die/exit signals propagate (e.g. from wp_send_json_*

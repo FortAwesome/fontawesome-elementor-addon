@@ -32,12 +32,15 @@
   },
   "archive": {
     "exclude": [
-      "phpcs.xml"
+      "phpcs.xml",
+      "phpunit.xml.dist",
+      "tests"
     ]
   },
   "scripts": {
     "phpcs": "phpcs --standard=phpcs.xml",
-    "phpcbf": "phpcbf --standard=phpcs.xml"
+    "phpcbf": "phpcbf --standard=phpcs.xml",
+    "test": "phpunit"
   },
   "config": {
     "allow-plugins": {

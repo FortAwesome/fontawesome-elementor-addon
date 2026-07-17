@@ -1,0 +1,4 @@
+#!/bin/bash
+
+# Run the PHPUnit test suite inside the wp-env tests container.
+wp-env run tests-cli --env-cwd wp-content/plugins/fontawesome-elementor-addon vendor/bin/phpunit "$@"

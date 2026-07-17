@@ -84,6 +84,11 @@ class Compatibility {
 			) );
 		}
 
+		// $error starts as an empty WP_Error (see above), so it carries a message
+		// only when one of the checks above merged a failure into it. Any single
+		// failure therefore means the environment is incompatible — hence >= 1.
+		// (Contrast is_compatible_for_editing(), which seeds $error with a
+		// baseline message and so correctly uses > 1.)
 		if ( count( $error->get_error_messages() ) >= 1 ) {
 			return $error;
 		} else {
