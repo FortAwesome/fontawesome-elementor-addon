@@ -32,6 +32,8 @@
       return [payload];
     }
 
+    console.error("[fontawesome-elementor-addon] Unexpected error payload", payload);
+
     return [];
   }
 
