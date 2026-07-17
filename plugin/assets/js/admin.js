@@ -10,8 +10,8 @@
   }
 
   // Normalize the many shapes an error payload can arrive in into a flat list
-  // of message strings. Historically only a plain array was handled, so
-  // single-object ({ message }) and string payloads were silently dropped.
+  // of message strings.
+  // Handles arrays, single-object ({ message }), and string payloads.
   function normalizeErrors(payload) {
     if (Array.isArray(payload)) {
       return payload
