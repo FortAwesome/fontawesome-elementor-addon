@@ -9,19 +9,74 @@
     );
   }
 
-  function displayErrors(errors) {
-    if (!Array.isArray(errors)) {
-      return;
+  // Normalize the many shapes an error payload can arrive in into a flat list
+  // of message strings. Historically only a plain array was handled, so
+  // single-object ({ message }) and string payloads were silently dropped.
+  function normalizeErrors(payload) {
+    if (Array.isArray(payload)) {
+      return payload
+        .map(function (entry) {
+          if (typeof entry === "string") {
+            return entry;
+          }
+          return entry && entry.message ? entry.message : null;
+        })
+        .filter(Boolean);
     }
 
-    for (const error of errors) {
+    if (payload && typeof payload === "object" && payload.message) {
+      return [payload.message];
+    }
+
+    if (typeof payload === "string" && payload) {
+      return [payload];
+    }
+
+    return [];
+  }
+
+  function clearErrors() {
+    $("#fontawesome-elementor-errors-subsection").hide().find("p").remove();
+  }
+
+  function displayErrors(errors) {
+    const messages = normalizeErrors(errors);
+
+    for (const message of messages) {
       $("#fontawesome-elementor-errors-subsection").append(
-        $("<p>").text(error.message),
+        $("<p>").text(message),
       );
     }
 
-    if (errors.length > 0) {
+    if (messages.length > 0) {
       $("#fontawesome-elementor-errors-subsection").show();
+    }
+  }
+
+  // Surface a failed AJAX request. Always logs the raw response to the console,
+  // so even a bare 500 with no JSON body (e.g. a PHP fatal / WSOD) leaves a
+  // diagnostic trail instead of vanishing.
+  function handleAjaxFailure(context, jqXHR) {
+    console.error(
+      "[fontawesome-elementor-addon] " + context + " request failed",
+      {
+        status: jqXHR && jqXHR.status,
+        statusText: jqXHR && jqXHR.statusText,
+        responseText: jqXHR && jqXHR.responseText,
+      },
+    );
+
+    const data = jqXHR && jqXHR.responseJSON && jqXHR.responseJSON.data;
+    const messages = normalizeErrors(data);
+
+    if (messages.length > 0) {
+      displayErrors(messages);
+    } else {
+      displayErrors(
+        "The server returned an error (HTTP " +
+          ((jqXHR && jqXHR.status) || "unknown") +
+          ") without any details. Enable WP_DEBUG_LOG and check your server error log, plus the browser console, for more information.",
+      );
     }
   }
 
@@ -42,9 +97,10 @@
       })
         .done(function (resp) {
           if (!resp || !resp.success) {
-            $("#fontawesome-elementor-addon-kit-setup-status-progress").text(
-              "Error checking status.",
-            );
+            $("#fontawesome-elementor-addon-kit-setup-spinner").hide();
+            $("#fontawesome-elementor-addon-kit-setup-status-progress").hide();
+            $("#fontawesome-elementor-addon-kit-setup-status-fail").show();
+            displayErrors((resp && resp.data) || "Error checking status.");
             setBusy(false);
             pollTimer = null;
             return;
@@ -76,12 +132,11 @@
           // Not done yet: wait, then poll again
           pollTimer = setTimeout(doPoll, delayMs);
         })
-        .fail(function (resp) {
+        .fail(function (jqXHR) {
           $("#fontawesome-elementor-addon-kit-setup-spinner").hide();
           $("#fontawesome-elementor-addon-kit-setup-status-progress").hide();
           $("#fontawesome-elementor-addon-kit-setup-status-fail").show();
-          const errors = resp?.responseJSON?.data || [];
-          displayErrors(errors);
+          handleAjaxFailure("status", jqXHR);
           setBusy(false);
           pollTimer = null;
         });
@@ -99,6 +154,7 @@
       }
 
       setBusy(true);
+      clearErrors();
       $("#fontawesome-elementor-addon-kit-setup-status-fail").hide();
       $("#fontawesome-elementor-addon-kit-setup-status-success").hide();
       $("#fontawesome-elementor-addon-kit-setup-status-progress").text(
@@ -115,6 +171,7 @@
           if (!resp || !resp.success) {
             $("#fontawesome-elementor-addon-kit-setup-status-progress").hide();
             $("#fontawesome-elementor-addon-kit-setup-status-fail").show();
+            displayErrors((resp && resp.data) || "Kit setup failed to start.");
             setBusy(false);
             return;
           }
@@ -124,12 +181,11 @@
           );
           poll(buildId);
         })
-        .fail(function (resp) {
+        .fail(function (jqXHR) {
           $("#fontawesome-elementor-addon-kit-setup-spinner").hide();
           $("#fontawesome-elementor-addon-kit-setup-status-progress").hide();
           $("#fontawesome-elementor-addon-kit-setup-status-fail").show();
-          const errors = resp?.responseJSON?.data || [];
-          displayErrors(errors);
+          handleAjaxFailure("start", jqXHR);
           setBusy(false);
         });
     });
