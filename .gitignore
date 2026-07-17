@@ -3,3 +3,4 @@ vendor/
 wp-dist/
 zip-dist/
 fontawesome-elementor-addon.zip
+.claude/
