@@ -3,7 +3,7 @@
  * Plugin Name:                Font Awesome Elementor Addon
  * Plugin URI:                 https://fontawesome.com/
  * Description:                Add Font Awesome Pro icons to Elementor.
- * Version:                    0.1.0-alpha1
+ * Version:                    0.1.0-alpha2
  * Author:                     Font Awesome
  * Author URI:                 https://fontawesome.com/
  * License:                    GPLv3

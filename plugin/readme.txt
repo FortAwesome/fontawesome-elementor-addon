@@ -1,6 +1,6 @@
 === Font Awesome Elementor Addon ===
 Contributors: fontawesome, mlwilkerson, frrrances
-Stable tag: 0.1.0-alpha1
+Stable tag: 0.1.0-alpha2
 Tags: FontAwesome, Elementor, icon, svg icon
 Requires at least: 5.8
 Tested up to: 6.9
@@ -85,6 +85,10 @@ This is only a cosmetic issue, and doesn't affect the actual icons you can selec
 This plugin requires an active Font Awesome Pro account that includes the Kit Download feature. (Font Awesome Pro Lite plans do not include Kit Download.)
 
 == Changelog ==
+= 0.1.0-alpha2 =
+
+* Adding more error diagnostics to troubleshoot setup and compatibility issues.
+
 = 0.1.0-alpha1 =
 
 * Initial alpha release.

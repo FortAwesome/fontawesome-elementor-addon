@@ -18,7 +18,7 @@ final class Plugin {
 	 * @since 0.1.0
 	 * @var string the plugin version.
 	 */
-	const PLUGIN_VERSION = '0.1.0-alpha1';
+	const PLUGIN_VERSION = '0.1.0-alpha2';
 
 	/**
 	 * Instance
