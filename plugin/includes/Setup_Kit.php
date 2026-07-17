@@ -75,8 +75,16 @@ class Setup_Kit {
 	}
 
 	public static function start(): void {
+		try {
+			self::handle_start();
+		} catch ( \Throwable $e ) {
+			self::send_throwable( $e );
+		}
+	}
+
+	private static function handle_start(): void {
 		if ( ! current_user_can( 'manage_options' ) ) {
-			wp_send_json_error( [ 'message' => 'Forbidden' ], 403 );
+			self::send_error( 'Forbidden', 403 );
 			return;
 		}
 
@@ -85,20 +93,21 @@ class Setup_Kit {
 		$compatibility = Compatibility::is_compatible_for_setup();
 
 		if ( \is_wp_error( $compatibility ) ) {
-			wp_send_json_error( $compatibility, 500 );
+			self::send_error( $compatibility, 500 );
 			return;
 		}
 
 		$api_token = Options::get_decrypted_api_token();
 
 		if ( is_wp_error( $api_token ) ) {
-			wp_send_json_error( $api_token, 500 );
+			self::send_error( $api_token, 500 );
+			return;
 		}
 
 		$option = get_option( Options::option_name(), [] );
 
 		if ( ! is_array( $option ) || ! isset( $option['kit_token'] ) || ! is_string( $option['kit_token'] ) ) {
-			wp_send_json_error( [ 'message' => __( 'Invalid Font Awesome kit token. Try re-setting it.', 'fontawesome-elementor-addon' ) ], 500 );
+			self::send_error( __( 'Invalid Font Awesome kit token. Try re-setting it.', 'fontawesome-elementor-addon' ), 500 );
 			return;
 		}
 
@@ -108,7 +117,7 @@ class Setup_Kit {
 		$access_token = $token_provider->get_access_token();
 
 		if ( is_wp_error( $access_token ) ) {
-			wp_send_json_error( $access_token, 500 );
+			self::send_error( $access_token, 500 );
 			return;
 		}
 
@@ -117,7 +126,7 @@ class Setup_Kit {
 		$kit_download = Kit_Download::create_kit_download( $query_resolver, $token_provider, $kit_token );
 
 		if ( is_wp_error( $kit_download ) ) {
-			wp_send_json_error( $kit_download, 500 );
+			self::send_error( $kit_download, 500 );
 			return;
 		}
 
@@ -125,8 +134,17 @@ class Setup_Kit {
 	}
 
 	public static function status() {
+		try {
+			self::handle_status();
+		} catch ( \Throwable $e ) {
+			self::send_throwable( $e );
+		}
+	}
+
+	private static function handle_status(): void {
 		if ( ! current_user_can( 'manage_options' ) ) {
-			wp_send_json_error( [ 'message' => 'Forbidden' ], 403 );
+			self::send_error( 'Forbidden', 403 );
+			return;
 		}
 
 		check_ajax_referer( 'fontawesome_elementor_addon_kit_setup_nonce', 'nonce' );
@@ -134,27 +152,28 @@ class Setup_Kit {
 		$build_id = isset( $_POST['build_id'] ) ? sanitize_text_field( wp_unslash( $_POST['build_id'] ) ) : '';
 
 		if ( ! $build_id || '' === $build_id ) {
-			wp_send_json_error( [ 'message' => __( 'Missing build_id', 'fontawesome-elementor-addon' ) ], 400 );
+			self::send_error( __( 'Missing build_id', 'fontawesome-elementor-addon' ), 400 );
 			return;
 		}
 
 		$option = get_option( Options::option_name(), [] );
 
 		if ( ! is_array( $option ) || ! isset( $option['kit_token'] ) || ! is_string( $option['kit_token'] ) ) {
-			wp_send_json_error( [ 'message' => __( 'Invalid Font Awesome kit token. Try re-setting it.', 'fontawesome-elementor-addon' ) ], 500 );
+			self::send_error( __( 'Invalid Font Awesome kit token. Try re-setting it.', 'fontawesome-elementor-addon' ), 500 );
 			return;
 		}
 
 		$api_token = Options::get_decrypted_api_token();
 
 		if ( is_wp_error( $api_token ) ) {
-			wp_send_json_error( $api_token, 500 );
+			self::send_error( $api_token, 500 );
+			return;
 		}
 
 		$upload_base_dir = self::get_upload_base_dir();
 
 		if ( is_wp_error( $upload_base_dir ) ) {
-			wp_send_json_error( $upload_base_dir, 500 );
+			self::send_error( $upload_base_dir, 500 );
 			return;
 		}
 
@@ -179,7 +198,7 @@ class Setup_Kit {
 
 			$message = $that_message . ' ' . $this_message;
 
-			wp_send_json_error( [ 'message' => $message ], 500 );
+			self::send_error( $message, 500 );
 
 			return;
 		}
@@ -200,9 +219,7 @@ class Setup_Kit {
 				)
 			);
 
-			$message = implode( ' ', $kit_assets_absolute_dir->get_error_messages() );
-
-			wp_send_json_error( [ 'message' => $message ], 500 );
+			self::send_error( $kit_assets_absolute_dir, 500 );
 
 			return;
 		}
@@ -229,10 +246,10 @@ class Setup_Kit {
 			unset( $previous_option['api_token'] );
 
 			if ( $previous_option !== $option ) {
-				wp_send_json_error( [
-					'message' =>
-											__( 'Your kit was successfully downloaded and set up on your WordPress server, but there was a problem updating the plugin options with the results. Try again?', 'fontawesome-elementor-addon' ),
-				], 500 );
+				self::send_error(
+					__( 'Your kit was successfully downloaded and set up on your WordPress server, but there was a problem updating the plugin options with the results. Try again?', 'fontawesome-elementor-addon' ),
+					500
+				);
 
 				return;
 			}
@@ -258,5 +275,131 @@ class Setup_Kit {
 		}
 
 		return $upload_dir['basedir'];
+	}
+
+	/**
+	 * Send a normalized JSON error response and log it server-side.
+	 *
+	 * Accepts a WP_Error, a plain string, or an array with a 'message' key, and
+	 * always emits `data` as a list of { code, message } objects so the client
+	 * can render every error consistently (previously, plain-array errors were
+	 * silently dropped by the front end because they were not a list). Server
+	 * errors (HTTP >= 500) are also written to the PHP error log so a diagnostic
+	 * trace survives even when the UI cannot show it. Client errors (4xx such as
+	 * a 403 "Forbidden" or a 400 "Missing build_id") are expected, actionable by
+	 * the caller, and would only be log noise, so they are not logged.
+	 *
+	 * @param WP_Error|string|array $error  The error to report.
+	 * @param int                   $status HTTP status code.
+	 */
+	private static function send_error( $error, int $status = 500 ): void {
+		$errors = self::normalize_errors( $error );
+
+		if ( $status >= 500 ) {
+			foreach ( $errors as $entry ) {
+				// phpcs:ignore WordPress.PHP.DevelopmentFunctions.error_log_error_log
+				error_log( sprintf(
+					'[fontawesome-elementor-addon] kit setup error (%s): %s',
+					$entry['code'],
+					$entry['message']
+				) );
+			}
+		}
+
+		wp_send_json_error( $errors, $status );
+	}
+
+	/**
+	 * Normalize an error of various shapes into a list of { code, message } entries.
+	 *
+	 * @param WP_Error|string|array $error The error to normalize.
+	 * @return array<int, array{code: string, message: string}>
+	 */
+	private static function normalize_errors( $error ): array {
+		if ( \is_wp_error( $error ) ) {
+			$entries = [];
+
+			foreach ( $error->get_error_codes() as $code ) {
+				foreach ( $error->get_error_messages( $code ) as $message ) {
+					$entries[] = [
+						'code' => (string) $code,
+						'message' => (string) $message,
+					];
+				}
+			}
+
+			if ( ! empty( $entries ) ) {
+				return $entries;
+			}
+		}
+
+		if ( is_string( $error ) && '' !== $error ) {
+			return [
+				[
+					'code' => 'error',
+					'message' => $error,
+				],
+			];
+		}
+
+		if ( is_array( $error ) && isset( $error['message'] ) && is_string( $error['message'] ) ) {
+			return [
+				[
+					'code' => ( isset( $error['code'] ) && is_string( $error['code'] ) ) ? $error['code'] : 'error',
+					'message' => $error['message'],
+				],
+			];
+		}
+
+		return [
+			[
+				'code' => 'unknown_error',
+				'message' => __( 'An unknown error occurred.', 'fontawesome-elementor-addon' ),
+			],
+		];
+	}
+
+	/**
+	 * Convert an uncaught Throwable into a logged, normalized JSON error response.
+	 *
+	 * Without this, an uncaught error/exception in an AJAX handler becomes a bare
+	 * HTTP 500 with no JSON body (or a WSOD HTML page), which the front end
+	 * silently swallows. This guarantees a full server-side log entry with stack
+	 * trace and a user-visible message.
+	 *
+	 * @param \Throwable $e The uncaught throwable.
+	 *
+	 * @throws \Throwable Re-thrown when $e is one of WordPress's own die/exit
+	 *                    signals (WPDieException, WPAjaxDieStopException,
+	 *                    WPAjaxDieContinueException), so normal response
+	 *                    termination is not swallowed.
+	 */
+	private static function send_throwable( \Throwable $e ): void {
+		// Let WordPress's own die/exit signals propagate (e.g. from wp_send_json_*
+		// under the PHPUnit ajax test harness). In production wp_die() exits, so
+		// this catch is never reached for a normal response.
+		if ( $e instanceof \WPDieException
+			|| $e instanceof \WPAjaxDieStopException
+			|| $e instanceof \WPAjaxDieContinueException ) {
+			throw $e;
+		}
+
+		// phpcs:ignore WordPress.PHP.DevelopmentFunctions.error_log_error_log
+		error_log( sprintf(
+			"[fontawesome-elementor-addon] uncaught %s during kit setup: %s in %s:%d\n%s",
+			get_class( $e ),
+			$e->getMessage(),
+			$e->getFile(),
+			$e->getLine(),
+			$e->getTraceAsString()
+		) );
+
+		$message = __( 'An unexpected error occurred during kit setup. Check your server error log for details.', 'fontawesome-elementor-addon' );
+
+		if ( defined( 'WP_DEBUG' ) && WP_DEBUG ) {
+			$message .= sprintf( ' [%s] %s', get_class( $e ), $e->getMessage() );
+		}
+
+		self::send_error( $message, 500 );
 	}
 }
